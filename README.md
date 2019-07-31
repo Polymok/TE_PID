@@ -8,11 +8,11 @@ Compute partial information decomposition (PID) on transfer entropy for an input
 
 ## Usage
 
-To calculate transfer entropy PID for all possible neuron triplets, call `TE_PID.m` with two required arguments: a matrix or cell, and a positive integer time-delay. For an input cell containing multiple matrices for multiple trials, the input cell must be 1-dimensional. Each matrix or cell column should contain the entire time-series of a single neuron. A time-delay is necessary to calculate transfer entropy. Output matrices have 7 columns indicating in increasing order: `target_index`, `source1_index`, `source2_index`, `synergy`, `redundancy`, `unique1`, `unique2`. PID output terms are given in units of bits.
+We identify a neuron with its time-series. To calculate transfer entropy PID for all possible neuron triplets, call `TE_PID.m` with two required arguments: a matrix or cell, and a positive integer time-delay. For an input cell containing multiple matrices for multiple trials, the input cell must be 1-dimensional. Each matrix or cell column should contain the entire time-series of a single neuron. A time-delay is necessary to calculate transfer entropy. Output matrices have 7 columns indicating in increasing order: `target_index`, `source1_index`, `source2_index`, `synergy`, `redundancy`, `unique1`, `unique2`. PID output terms are given in units of bits. Each row of the output matrix contains terms for a specific triplet.
 
 ### Examples
 
-Call `TE_PID.m` with test case matrices in `test_logicgates.mat` and time-delay `1`.
+Call `TE_PID.m` with test case matrix variables {`identity`, `xor`, `and`} stored in `test_logicgates.mat` and time-delay `1`.
 
 ```MATLAB
 >> cd ~/TE_PID  
@@ -34,6 +34,8 @@ ans =
   ...
 ```
 
+In all three test variables, the first column contains the target time-series of interest. Therefore, we check the first row of the output matrix where `target_index = 1` to verify that our code runs as expected. Note that since transfer entropy splits the target time-series into a future time-series and a past time-series, test cases have their first column shifted by one. As expected, all transfer entropy information is found in `unique1` for `identity`, `synergy` for the `xor` relation. In the case of `and`, small values obtain for `unique1` and `unique2`, contrary to the expected zero value. Hopefully, this will be resolved in the future.
+
 ## Functions
 
 ### `TE_PID.m`
@@ -50,7 +52,7 @@ For *N* neurons, the number of possible neuron triplets is *N\*(N-1)\*(N-2)/2*. 
 
 #### Returns:
 
-*PID_matrix*: MATLAB matrix or 1-dimensional cell. Output matrices have 7 columns indicating in increasing order: `target_index`, `source1_index`, `source2_index`, `synergy`, `redundancy`, `unique1`, `unique2`. PID output terms are given in units of bits.
+*PID_matrix*: MATLAB matrix or 1-dimensional cell. Output matrices have 7 columns indicating in increasing order: `target_index`, `source1_index`, `source2_index`, `synergy`, `redundancy`, `unique1`, `unique2`. Each row of the output matrix corresponds to a specific triplet. PID terms are given in units of bits.
 
 ### Call structure
 
@@ -61,13 +63,15 @@ For *N* neurons, the number of possible neuron triplets is *N\*(N-1)\*(N-2)/2*. 
 `TE.m`                calls `cond_MI.m`  
 `TE_2dim.m`           calls `cond_MI_2dim.m`
 
-### Unfinished and exploratory
-
-* `ndim_cond_MI.m` is not necessary to call `TE_PID.m`. It is, however, an exploratory work-in-progress to extend conditional mutual information to accept *n*-dimensional input time-series. Such an extension from 2-dimensional inputs has proven non-trivial.
+### Unfinished
 
 * `TE_tripletfinder.m` finds functional neuron triplets `{i,j,k}` that satisfy `TE(j->i)` and `TE(k->i)` greater than some significance value. This function is unfinished and has yet to be incorporated into `TE_PID.m`.
 
-* `MI.m` computes the mutual information between two input time-series. This function is not required to call `TE_PID.m`.
+### Exploratory
+
+* `MI.m` computes the mutual information between two scalar-valued, discrete time-series. This function is not required to call `TE_PID.m`.
+
+* `ndim_cond_MI.m` computes the conditional mutual information for vector-valued, discrete time-series. This function is not required to call `TE_PID.m`.
 
 ## Bugs
 

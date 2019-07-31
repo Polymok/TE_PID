@@ -15,9 +15,9 @@
 function [condMI] = cond_MI_2dim(X, Y, Z)
     % Check if inputs are of acceptable type and length.
     if (~isvector(Y)) || (~isvector(Z))
-        error('Second and third inputs are not vectors.')
+        error('Y and Z are not vectors.')
     elseif (size(X,1)~=2) && (size(X,2)~=2)
-        error('First input time-series is not 2-dimensional.')
+        error('X is not 2-dimensional.')
     elseif (length(X)~=length(Y)) || (length(X)~=length(Z)) || (length(Y)~=length(Z))
         error('Input time-series are not of equal length.')
     end
@@ -42,15 +42,15 @@ function [condMI] = cond_MI_2dim(X, Y, Z)
                     jointprob = sum(sum([X(:,1) X(:,2) Y Z]==[i j k l],2)==4);
                     % Cases of probability zero are discarded.
                     if jointprob == 0
-                        disp(['Pr(source1,source2,target_past,target_future=', num2str(i), ',', num2str(j), ',', num2str(l), ',', num2str(k), ') is zero. Case discarded.'])
+                        disp(['Pr(X_1,X_2,Y,Z=', num2str(i), ',', num2str(j), ',', num2str(k), ',', num2str(l), ') is zero. Case discarded.'])
                     else
-                        prob1condition = sum(sum([X(:,1) X(:,2) Z]==[i j l],2)==3);
-                        prob2condition = sum(sum([Y Z]==[k l],2)==2);
-                        if (prob1condition == 0) || (prob2condition == 0)
-                            disp(['Pr(source1,source2,target_past=', num2str(i), ',', num2str(j), ',', num2str(l), ') or Pr(target_future,target_past=', num2str(k), ',', num2str(l), ') is zero. Case discarded.'])
+                        probXZ = sum(sum([X(:,1) X(:,2) Z]==[i j l],2)==3);
+                        probYZ = sum(sum([Y Z]==[k l],2)==2);
+                        if (probXZ == 0) || (probYZ == 0)
+                            disp(['Pr(X_1,X_2,Z=', num2str(i), ',', num2str(j), ',', num2str(l), ') or Pr(Y,Z=', num2str(k), ',', num2str(l), ') is zero. Case discarded.'])
                         else
-                            probcondition = sum(Z==l);
-                            condMI = condMI + jointprob/size(X,1) * log(jointprob * probcondition / prob1condition / prob2condition) / log(2);
+                            probZ = sum(Z==l);
+                            condMI = condMI + jointprob/size(X,1) * log(jointprob * probZ / probXZ / probYZ) / log(2);
                         end
                     end
                 end

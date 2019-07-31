@@ -27,15 +27,15 @@ function [condMI] = cond_MI(X, Y, Z)
                 jointprob = sum(sum([X Y Z]==[i j k],2)==3);
                 % Cases of probability zero are discarded.
                 if jointprob == 0
-                    disp(['Pr(source,target_past,target_future=', num2str(i), ',', num2str(k), ',', num2str(j), ') is zero. Case discarded.'])
+                    disp(['Pr(X,Y,Z=', num2str(i), ',', num2str(j), ',', num2str(k), ') is zero. Case discarded.'])
                 else
-                    prob1condition = sum(sum([X Z]==[i k],2)==2);
-                    prob2condition = sum(sum([Y Z]==[j k],2)==2);
-                    if (prob1condition == 0) || (prob2condition == 0)
-                        disp(['Pr(source,target_past=', num2str(i), ',', num2str(k), ') or Pr(target_past,target_future=', num2str(k), ',', num2str(j), ') is zero. Case discarded.'])
+                    probXZ = sum(sum([X Z]==[i k],2)==2);
+                    probYZ = sum(sum([Y Z]==[j k],2)==2);
+                    if (probXZ == 0) || (probYZ == 0)
+                        disp(['Pr(X,Z=', num2str(i), ',', num2str(k), ') or Pr(Y,Z=', num2str(j), ',', num2str(k), ') is zero. Case discarded.'])
                     else
-                        probcondition = sum(Z==k);
-                        condMI = condMI + jointprob/length(X) * log(jointprob * probcondition / prob1condition / prob2condition) / log(2);
+                        probZ = sum(Z==k);
+                        condMI = condMI + jointprob/length(X) * log(jointprob * probZ / probXZ / probYZ) / log(2);
                     end    
                 end
             end
