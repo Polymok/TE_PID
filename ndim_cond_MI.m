@@ -47,7 +47,7 @@ function [condMI] = ndim_cond_MI(X, Y, Z)
                         disp(['Pr(X,Z=', num2str(i'), ',', num2str(k'), ') or Pr(Y,Z=', num2str(j'), ',', num2str(k'), ') is zero. Case discarded.'])
                     else
                         probZ = sum(Z==k');
-                        condMI = condMI + jointprob/(size(X,2)+size(Y,2)+size(Z,2)) * log(jointprob * probZ / probXZ / probYZ) / log(2);
+                        condMI = condMI + jointprob/size(X,1) * log(jointprob * probZ / probXZ / probYZ) / log(2);
                     end    
                 end
             end
