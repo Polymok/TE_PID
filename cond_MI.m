@@ -20,12 +20,13 @@ function [condMI] = cond_MI(X, Y, Z)
     Y = Y(:);
     Z = Z(:);
     condMI = 0; % Initialize output.
-    % The following three for loops sum over all possible values that the three time-series may take.
+    % Sum over all possible values that the three time-series may take.
     for i = unique(X')
         for j = unique(Y')
             for k = unique(Z')
+                % Record number of instances instead of probability.
                 jointprob = sum(sum([X Y Z]==[i j k],2)==3);
-                % Cases of probability zero are discarded.
+                % Discard cases with probability zero.
                 if jointprob == 0
                     disp(['Pr(X,Y,Z=', num2str(i), ',', num2str(j), ',', num2str(k), ') is zero. Case discarded.'])
                 else
@@ -36,6 +37,7 @@ function [condMI] = cond_MI(X, Y, Z)
                     else
                         probZ = sum(Z==k);
                         condMI = condMI + jointprob/length(X) * log(jointprob * probZ / probXZ / probYZ) / log(2);
+                        % Divide number of instances by length to obtain probability. Divide by log(2) to return units of bits.
                     end    
                 end
             end

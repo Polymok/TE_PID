@@ -42,8 +42,9 @@ function [output_data] = TE_PID(input_data, delay)
             clear str
         end
         output_data = zeros(size(input_data,2)*(size(input_data,2)-1)*(size(input_data,2)-2)/2, 7); % Initialize output matrix for a single trial. 7 total indices: target, source1, source2, synergy, redundancy, unique1, unique2.
+        % Initialize row index to write outputs to output_matrix.
         % Pick out all neuron triplets.
-        row_index = 1; % Initialize row index to write outputs to output_matrix. 
+        row_index = 1; 
         for i = 1:(size(input_data,2)) % Target neuron.
             for j = 1:(size(input_data,2)-1) % Source neuron 1.
                 if i==j
@@ -84,8 +85,9 @@ function [output_data] = TE_PID(input_data, delay)
                 clear str
             end
             output_matrix = zeros(size(input_matrix,2)*(size(input_matrix,2)-1)*(size(input_matrix,2)-2)/2, 7); % Initialize output matrix for a single trial. 7 total indices: target, source1, source2, synergy, redundancy, unique1, unique2.
+            % Initialize row index to write outputs to output_matrix.
+            row_index = 1;
             % Pick out all neuron triplets.
-            row_index = 1; % Initialize row index to write outputs to output_matrix. 
             for i = 1:(size(input_matrix,2)) % Target neuron.
                 for j = 1:(size(input_matrix,2)-1) % Source neuron 1.
                     if i==j

@@ -33,11 +33,13 @@ function [condMI] = ndim_cond_MI(X, Y, Z)
         error('Input vectors are not of equal length.')
     end
     condMI = 0; % Initialize output.
-    % Loop over all unique values of X, Y, and Z.
+    % Sum over all unique values of X, Y, and Z.
     for i = unique(X,'row')'
         for j= unique(Y,'row')'
-            for k = unique(Z,'row')'               
+            for k = unique(Z,'row')'
+                % Record number of instances instead of probability.
                 jointprob = sum(sum([X Y Z]==[i' j' k'],2)==(size(X,2)+size(Y,2)+size(Z,2)));
+                % Discard cases with probability zero.
                 if jointprob == 0
                     disp(['Pr(X,Y,Z=', num2str(i'), ',', num2str(j'), ',', num2str(k'), ') is zero. Case discarded.'])
                 else
@@ -48,6 +50,7 @@ function [condMI] = ndim_cond_MI(X, Y, Z)
                     else
                         probZ = sum(Z==k');
                         condMI = condMI + jointprob/size(X,1) * log(jointprob * probZ / probXZ / probYZ) / log(2);
+                        % Divide number of instances by length of time-series to obtain probability. Divide by log(2) to return units of bits.
                     end    
                 end
             end

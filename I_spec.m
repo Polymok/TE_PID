@@ -39,9 +39,12 @@ function [spec_info] = I_spec(target, target_future_value, delay, opt_source)
         target_past = target;
         target_past((length(target)-delay+1):length(target)) = [];
         opt_source((length(opt_source)-delay+1):length(opt_source)) = [];
+        % Sum over all possible values that the two time-series may take.
         for i = unique(target_past')
             for j = unique(opt_source')
+                % Record number of instances instead of probability.
                 jointprob = sum(sum([opt_source target_past target_future]==[j i target_future_value],2)==3);
+                % Discard cases with probability zero.
                 if jointprob == 0
                     disp(['Pr(source,target_future,target_past=', num2str(j), ',', num2str(target_future_value), ',', num2str(i), ') is zero. Case discarded.'])
                 else
@@ -52,6 +55,7 @@ function [spec_info] = I_spec(target, target_future_value, delay, opt_source)
                         if pastprob == 0
                         else
                         spec_info = spec_info + jointprob / futureprob * log(jointprob / pastprob / futureprob * length(target_future)) / log(2);
+                        % Multiply term within log() by length to ensure dimensions are correct. Divide by log(2) to return units of bits.
                         end
                     end
                 end
@@ -65,9 +69,10 @@ function [spec_info] = I_spec(target, target_future_value, delay, opt_source)
         target_future(1:delay) = [];
         target_past = target;
         target_past((length(target)-delay+1):length(target)) = [];
+        % Sum over all possible values that the time-series may take.
         for i = unique(target_past')
             jointprob = sum(sum([target_past target_future]==[i target_future_value],2)==2);
-            % Cases of probability zero are discarded.
+            % Discard cases with probability zero.
             if jointprob == 0
                 disp(['Pr(target_past,target_future=', num2str(i), ',', num2str(target_future_value), ') is zero. Case discarded.'])
             else
@@ -78,6 +83,7 @@ function [spec_info] = I_spec(target, target_future_value, delay, opt_source)
                     if pastprob == 0
                     else
                         spec_info = spec_info + jointprob / futureprob * log(jointprob / pastprob / futureprob * length(target_future)) / log(2);
+                        % Multiply term within log() by length to ensure dimensions are correct. Divide by log(2) to return units of bits.
                     end
                 end
             end

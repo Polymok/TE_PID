@@ -16,17 +16,19 @@ function [mutual_info] = MI(X, Y)
     X = X(:);
     Y = Y(:);
     mutual_info = 0; % Initialize output.
-    % The following two for loops sum over all possible values that the two time-series may take.
+    % Sum over all possible values that the two time-series may take.
     for i = unique(X')
         for j = unique(Y')
+            % Record number of instances instead of probability.
             jointprob = sum(sum([X Y]==[i j],2)==2);
-            % Cases of probability zero are discarded.
+            % Discard cases with probability zero.
             if jointprob == 0
                 disp(['Pr(X,Y=', num2str(i), ',', num2str(k), ') is zero. Case discarded.'])
             else
                 probx = sum(X==i);
                 proby = sum(Y==j);
                 mutual_info = mutual_info + jointprob / length(X) * log(jointprob / probx / proby * length(X)) / log(2);
+                % Divide number of instances by length to obtain probability. Divide by log(2) to return units of bits.
             end
         end
     end

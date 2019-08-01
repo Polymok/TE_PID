@@ -33,14 +33,15 @@ function [condMI] = cond_MI_2dim(X, Y, Z)
     Y = Y(:);
     Z = Z(:);
     condMI = 0;
-    % The following four for loops sum over all possible values that the
-    % three time-series---one of which is 2-dimensional---may take.
+    % Sum over all possible values that the three time-series---one of
+    % which is 2-dimensional---may take.
     for i = unique(X(:,1)')
         for j = unique(X(:,2)')
             for k = unique(Y')
                 for l = unique(Z')
+                    % Record number of instances instead of probability.
                     jointprob = sum(sum([X(:,1) X(:,2) Y Z]==[i j k l],2)==4);
-                    % Cases of probability zero are discarded.
+                    % Discard cases with probability zero.
                     if jointprob == 0
                         disp(['Pr(X_1,X_2,Y,Z=', num2str(i), ',', num2str(j), ',', num2str(k), ',', num2str(l), ') is zero. Case discarded.'])
                     else
@@ -51,6 +52,7 @@ function [condMI] = cond_MI_2dim(X, Y, Z)
                         else
                             probZ = sum(Z==l);
                             condMI = condMI + jointprob/size(X,1) * log(jointprob * probZ / probXZ / probYZ) / log(2);
+                            % Divide number of instances by length to obtain probability. Divide by log(2) to return units of bits.
                         end
                     end
                 end

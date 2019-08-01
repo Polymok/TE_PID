@@ -80,7 +80,7 @@ For *N* neurons, the number of possible neuron triplets is *N\*(N-1)\*(N-2)/2*. 
 ## Bugs
 
 * `I_spec.m`, `cond_MI.m` and `cond_MI_2dim.m` may condition on events with zero probability. When zero probability events are encountered, a notification is printed to the MATLAB console. For now, all cases involving zero probability are discarded. Such a decision may require theoretical justification. Possible alternative solutions include:
-  * Time-binning. For Yuqing's model, all AdEx neurons have some time constant `tau`. Might make sense to bin at time resolution equal to `tau`.
+  * Time-binning. For Yuqing's model, all AdEx neurons have some time constant *tau*. Might make sense to bin at time resolution equal to *tau*.
   * Choosing an arbitrarily small value in place of probability zero, e.g. `eps` in MATLAB.
 
 * `TE.m` and `TE_2dim.m` calculate the transfer entropy normalized by the entropy of the target. If target entropy is zero, a notification is printed to the MATLAB console. For now, all cases involving zero target entropy use instead the unnormalized transfer entropy.

@@ -38,4 +38,5 @@ function [transfer_entropy, normed_TE] = TE(target, source, delay)
         normed_TE = transfer_entropy;
     else
         normed_TE = transfer_entropy / target_entropy;
+    end
 end
