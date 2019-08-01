@@ -8,13 +8,13 @@ Compute partial information decomposition (PID) on transfer entropy for an input
 
 ## Usage
 
-We identify a neuron with its time-series. To calculate transfer entropy PID for all possible neuron triplets, call `TE_PID.m` with two required arguments: a matrix or cell, and a positive integer time-delay. For an input cell containing multiple matrices for multiple trials, the input cell must be 1-dimensional. Each matrix or cell column should contain the entire time-series of a single neuron. A time-delay is necessary to calculate transfer entropy. Output matrices have 7 columns indicating in increasing order: `target_index`, `source1_index`, `source2_index`, `synergy`, `redundancy`, `unique1`, `unique2`. PID output terms are given in units of bits. Each row of the output matrix contains terms for a specific triplet.
+We identify a neuron with its time-series. To calculate transfer entropy PID for all possible neuron triplets, call `TE_PID.m` with two required arguments: a matrix or cell, and a positive integer time-delay. For an input cell containing multiple matrices for multiple trials, the input cell must be 1-dimensional. Each matrix or cell column should contain the entire time-series of a single neuron. A time-delay is necessary to calculate transfer entropy. Output matrices have 7 columns indicating in increasing order: *target_index*, *source1_index*, *source2_index*, *synergy*, *redundancy*, *unique1*, *unique2*. PID output terms are given in units of bits. Each row of the output matrix contains terms for a specific triplet.
 
 ### Examples
 
-Call `TE_PID.m` with test case matrix variables {`identity`, `xor`, `and`} stored in `test_logicgates.mat` and time-delay `1`.
+Call `TE_PID.m` with test case matrix variables `{identity, xor, and}` stored in `test_logicgates.mat` and time-delay `1`.
 
-```MATLAB
+```
 >> cd ~/TE_PID  
 >> load test_logicgates.mat  
 >> TE_PID(identity, 1)  
@@ -34,7 +34,11 @@ ans =
   ...
 ```
 
-In all three test variables, the first column contains the target time-series of interest. Therefore, we check the first row of the output matrix where `target_index = 1` to verify that our code runs as expected. Note that since transfer entropy splits the target time-series into a future time-series and a past time-series, test cases have their first column shifted by one. As expected, all transfer entropy information is found in `unique1` for `identity`, `synergy` for the `xor` relation. In the case of `and`, small values obtain for `unique1` and `unique2`, contrary to the expected zero value. Hopefully, this will be resolved in the future.
+In all three test variables, the first column contains the target time-series of interest. Therefore, we check the first row of the output matrix where *target_index = 1* to verify that our code runs as expected. Note that since transfer entropy splits the target time-series into a future time-series and a past time-series, test cases have their first column shifted by one.
+
+As expected, all transfer entropy information is found in *unique1* for the `identity` test case, *synergy* for the `xor` relation.
+
+In the case of `and`, small values obtain for *unique1* and *unique2*, contrary to the expected zero value, and the *synergy* is slightly larger than the expected *0.5* bits. This is due to a discrepancy between the unnormalized and normalized transfer entropies. The entropy of the target time-series is *H(target) = -0.25\*log(0.25)-0.75\*log(0.75) = 0.8113*. The unnormalized transfer entropies are *TE(source1->target) = TE(source2->target) = 0.3113 = redundancy*, and *TE({source1,source2}->target) = 0.8113*. Therefore, the normalized transfer entropies are *normed_TE(source1->target) = normed_TE(source2->target) = 0.3837 > redundancy* and *normed_TE({source1,source2}->target) = 1*.
 
 ## Functions
 
@@ -65,13 +69,13 @@ For *N* neurons, the number of possible neuron triplets is *N\*(N-1)\*(N-2)/2*. 
 
 ### Unfinished
 
-* `TE_tripletfinder.m` finds functional neuron triplets `{i,j,k}` that satisfy `TE(j->i)` and `TE(k->i)` greater than some significance value. This function is unfinished and has yet to be incorporated into `TE_PID.m`.
+* `TE_tripletfinder.m` finds functional neuron triplets *{i,j,k}* that satisfy *TE(j->i)* and *TE(k->i)* greater than some significance value. This function is unfinished and has yet to be incorporated into `TE_PID.m`.
 
 ### Exploratory
 
 * `MI.m` computes the mutual information between two scalar-valued, discrete time-series. This function is not required to call `TE_PID.m`.
 
-* `ndim_cond_MI.m` computes the conditional mutual information for vector-valued, discrete time-series. This function is not required to call `TE_PID.m`.
+* `ndim_cond_MI.m` computes the conditional mutual information for vector-valued, discrete time-series. This function is not required to call `TE_PID.m`. It is possible in the future to replace both `cond_MI.m` and `cond_MI_2dim.m` by a function that allows *n*-dimensional inputs, namely `ndim_cond_MI.m`. Similarly, `TE.m` and `TE_2dim.m` may be subsumed under a single function.
 
 ## Bugs
 
@@ -83,7 +87,7 @@ For *N* neurons, the number of possible neuron triplets is *N\*(N-1)\*(N-2)/2*. 
 
 * Non-zero values (both positive and negative) with small magnitude may obtain when value zero is expected. Possible reasons include:  
   * Rounding error may occur. Information measures in `I_spec.m`, `cond_MI.m`, and `cond_MI_2dim.m` involve both ratios of probabilities as well as the absolute value of probabilities. Ratio calculations use the number of occurrences unnormalized by the total length of the time-series, whereas the absolute value probabilities are divided by the total length.
-  * Transfer entropy is normalized by the entropy of the target_future time-series in `TE.m` and `TE_2dim.m` to calculate transfer entropy terms in `TE_PID.m`. This may lead to small discrepancies between the redundancy and the transfer entropy between the individual sources and the target in some cases.
+  * Transfer entropy is normalized by the entropy of the target_future time-series in `TE.m` and `TE_2dim.m` to calculate transfer entropy terms in `TE_PID.m`. This may lead to small discrepancies between the redundancy and the transfer entropy between the individual sources and the target in some cases. We can consider using the unnormalized transfer entropy for all calculations.
 
 ## References
 
