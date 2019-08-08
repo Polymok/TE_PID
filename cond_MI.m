@@ -9,19 +9,19 @@
 function [condMI] = cond_MI(X, Y, Z)
     % Ensure input time-series are column vectors.
     if size(X,1) < size(X,2)
-        str = input('Input vector A has a greater number of columns than rows. Each column should contain the entire time-series of a single neuron. Transpose input matrix? y/n: ','s');
+        str = input('Input vector X has a greater number of columns than rows. Each column should contain the entire time-series of a single neuron. Transpose input matrix? y/n: ','s');
         if str == 'y'
             X = X';
         end
     end
     if size(Y,1) < size(Y,2)
-        str = input('Input vector B has a greater number of columns than rows. Each column should contain the entire time-series of a single neuron. Transpose input matrix? y/n: ','s');
+        str = input('Input vector Y has a greater number of columns than rows. Each column should contain the entire time-series of a single neuron. Transpose input matrix? y/n: ','s');
         if str == 'y'
             Y = Y';
         end
     end
     if size(Z,1) < size(Z,2)
-        str = input('Input vector C has a greater number of columns than rows. Each column should contain the entire time-series of a single neuron. Transpose input matrix? y/n: ','s');
+        str = input('Input vector Z has a greater number of columns than rows. Each column should contain the entire time-series of a single neuron. Transpose input matrix? y/n: ','s');
         if str == 'y'
             Z = Z';
         end
@@ -48,7 +48,6 @@ function [condMI] = cond_MI(X, Y, Z)
                     else
                         probZ = sum(Z==k');
                         condMI = condMI + jointprob/size(X,1) * log(jointprob * probZ / probXZ / probYZ) / log(2);
-                        % Divide number of instances by length of time-series to obtain probability. Divide by log(2) to return units of bits.
                     end    
                 end
             end

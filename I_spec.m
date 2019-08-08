@@ -55,7 +55,6 @@ function [spec_info] = I_spec(target, target_future_value, delay, opt_source)
                         if pastprob == 0
                         else
                         spec_info = spec_info + jointprob / futureprob * log(jointprob / pastprob / futureprob * length(target_future)) / log(2);
-                        % Multiply term within log() by length to ensure dimensions are correct. Divide by log(2) to return units of bits.
                         end
                     end
                 end
@@ -83,7 +82,6 @@ function [spec_info] = I_spec(target, target_future_value, delay, opt_source)
                     if pastprob == 0
                     else
                         spec_info = spec_info + jointprob / futureprob * log(jointprob / pastprob / futureprob * length(target_future)) / log(2);
-                        % Multiply term within log() by length to ensure dimensions are correct. Divide by log(2) to return units of bits.
                     end
                 end
             end

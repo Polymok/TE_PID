@@ -10,13 +10,13 @@
 function [transfer_entropy, normed_TE] = TE(target, source, delay)
     % Ensure input time-series are column vectors.
     if size(target,1) < size(target,2)
-        str = input('Input vector A has a greater number of columns than rows. Each column should contain the entire time-series of a single neuron. Transpose input matrix? y/n: ','s');
+        str = input('Target input vector has a greater number of columns than rows. Each column should contain the entire time-series of a single neuron. Transpose input matrix? y/n: ','s');
         if str == 'y'
             target = target';
         end
     end
     if size(source,1) < size(source,2)
-        str = input('Input vector B has a greater number of columns than rows. Each column should contain the entire time-series of a single neuron. Transpose input matrix? y/n: ','s');
+        str = input('Source input vector has a greater number of columns than rows. Each column should contain the entire time-series of a single neuron. Transpose input matrix? y/n: ','s');
         if str == 'y'
             source = source';
         end
