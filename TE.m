@@ -1,36 +1,44 @@
-% Given two time-series T, S and one integer time-delay in units of time points, this function
+% Given two time-series T, S and one integer time-delay, this function
 % returns the transfer entropy from S to T with the given time-delay
 % between T_future and T_past. Transfer entropy normalized by entropy of
 % the target time-series is also calculated.
 %
 % Output is a scalar in units of bits.
 %
-% This function can only take discrete, scalar-valued time-series.
+% This function can only take discrete time-series.
 
 function [transfer_entropy, normed_TE] = TE(target, source, delay)
-     % Check if inputs are of acceptable type and length.
-    if (~isvector(target)) || (~isvector(source))
-        error('Input time-series is not a vector.')
-    elseif length(target) ~= length(source)
+    % Ensure input time-series are column vectors.
+    if size(target,1) < size(target,2)
+        str = input('Input vector A has a greater number of columns than rows. Each column should contain the entire time-series of a single neuron. Transpose input matrix? y/n: ','s');
+        if str == 'y'
+            target = target';
+        end
+    end
+    if size(source,1) < size(source,2)
+        str = input('Input vector B has a greater number of columns than rows. Each column should contain the entire time-series of a single neuron. Transpose input matrix? y/n: ','s');
+        if str == 'y'
+            source = source';
+        end
+    end
+    % Check if inputs are of the same length.
+    if size(target,1)~= size(source,1)
         error('Time-series are not of equal length.')
     elseif (round(delay)~=delay) || (delay<1)
         error('Input time-delay is not a positive integer.')
     end
-    % Ensure time-series are represented as column vectors.
-    target = target(:);
-    source = source(:);
     % Truncate at beginning or end of time-series to create time-delay.
     target_future = target;
-    target_future(1:delay) = [];
+    target_future(1:delay,:) = [];
     target_past = target;
-    target_past((length(target)-delay+1):length(target)) = [];
+    target_past((size(target,1)-delay+1):size(target,1),:) = [];
     source_past = source;
-    source_past((length(source)-delay+1):length(source)) = [];
+    source_past((size(source,1)-delay+1):size(source,1),:) = [];
     transfer_entropy = cond_MI(source_past, target_future, target_past);
     % Normalize by entropy of target time-series.
     target_entropy = 0;
-    for i = unique(target_future')
-        prob = sum(target_future==i)/length(target_future);
+    for i = unique(target_future, 'row')'
+        prob = sum(target_future==i')/size(target_future,1);
         target_entropy = target_entropy - prob * log(prob) / log(2);
     end
     if target_entropy == 0

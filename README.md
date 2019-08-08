@@ -60,34 +60,27 @@ For *N* neurons, the number of possible neuron triplets is *N\*(N-1)\*(N-2)/2*. 
 
 ### Call structure
 
-`TE_PID.m`            calls `I_min_TE.m`, `TE.m`, `TE_2dim.m`  
+`TE_PID.m`            calls `I_min_TE.m`, `TE.m`  
 `I_min_TE.m`          calls `I_spec.m`  
 `TE_tripletfinder.m`  calls `TE_timelag.m`  
 `TE_timelag.m`        calls `TE.m`  
 `TE.m`                calls `cond_MI.m`  
-`TE_2dim.m`           calls `cond_MI_2dim.m`
 
 ### Unfinished
 
 * `TE_tripletfinder.m` finds functional neuron triplets *{i,j,k}* that satisfy *TE(j->i)* and *TE(k->i)* greater than some significance value. This function is unfinished and has yet to be incorporated into `TE_PID.m`.
 
-### Exploratory
-
-* `MI.m` computes the mutual information between two scalar-valued, discrete time-series. This function is not required to call `TE_PID.m`.
-
-* `ndim_cond_MI.m` computes the conditional mutual information for vector-valued, discrete time-series. This function is not required to call `TE_PID.m`. It is possible in the future to replace both `cond_MI.m` and `cond_MI_2dim.m` by a function that allows *n*-dimensional inputs, namely `ndim_cond_MI.m`. Similarly, `TE.m` and `TE_2dim.m` may be subsumed under a single function.
-
 ## Bugs
 
-* `I_spec.m`, `cond_MI.m` and `cond_MI_2dim.m` may condition on events with zero probability. When zero probability events are encountered, a notification is printed to the MATLAB console. For now, all cases involving zero probability are discarded. Such a decision may require theoretical justification. Possible alternative solutions include:
+* `I_spec.m` and `cond_MI.m` may condition on events with zero probability. When zero probability events are encountered, a notification is printed to the MATLAB console. For now, all cases involving zero probability are discarded. Such a decision may require theoretical justification. Possible alternative solutions include:
   * Time-binning. For Yuqing's model, all AdEx neurons have some time constant *tau*. Might make sense to bin at time resolution equal to *tau*.
   * Choosing an arbitrarily small value in place of probability zero, e.g. `eps` in MATLAB.
 
-* `TE.m` and `TE_2dim.m` calculate the transfer entropy normalized by the entropy of the target. If target entropy is zero, a notification is printed to the MATLAB console. For now, all cases involving zero target entropy use instead the unnormalized transfer entropy.
+* `TE.m` calculates the transfer entropy normalized by the entropy of the target. If target entropy is zero, a notification is printed to the MATLAB console. For now, all cases involving zero target entropy use instead the unnormalized transfer entropy.
 
 * Non-zero values (both positive and negative) with small magnitude may obtain when value zero is expected. Possible reasons include:  
-  * Rounding error may occur. Information measures in `I_spec.m`, `cond_MI.m`, and `cond_MI_2dim.m` involve both ratios of probabilities as well as the absolute value of probabilities. Ratio calculations use the number of occurrences unnormalized by the total length of the time-series, whereas the absolute value probabilities are divided by the total length.
-  * Transfer entropy is normalized by the entropy of the target_future time-series in `TE.m` and `TE_2dim.m` to calculate transfer entropy terms in `TE_PID.m`. This may lead to small discrepancies between the redundancy and the transfer entropy between the individual sources and the target in some cases. We can consider using the unnormalized transfer entropy for all calculations.
+  * Rounding error may occur. Information measures in `I_spec.m` and `cond_MI.m` require both ratios of probabilities as well as the absolute value of probabilities. Ratio calculations use the number of occurrences unnormalized by the total length of the time-series, whereas the absolute value probabilities are divided by the total length.
+  * Transfer entropy is normalized by the entropy of the target_future time-series in `TE.m` to calculate transfer entropy terms in `TE_PID.m`. This may lead to small discrepancies between the redundancy and the transfer entropy between the individual sources and the target in some cases. We can consider using the unnormalized transfer entropy for all calculations.
 
 ## References
 
