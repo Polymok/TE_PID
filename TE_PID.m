@@ -20,10 +20,6 @@
 %
 % PID is calculated for all neuron triplets. If N simultaneously recorded
 % time-series are given, N*(N-1)*(N-2)/2 triplets are returned.
-%
-% TODO:
-% Add first round filtering of neuron triplets by identifying significant
-% transfer entropy values.
 
 function [output_data] = TE_PID(input_data, delay)
     if ~isscalar(delay)

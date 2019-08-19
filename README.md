@@ -66,9 +66,9 @@ For *N* neurons, the number of possible neuron triplets is *N\*(N-1)\*(N-2)/2*. 
 `TE_timelag.m`        calls `TE.m`  
 `TE.m`                calls `cond_MI.m`  
 
-### Unfinished
+## To do
 
-* `TE_tripletfinder.m` finds functional neuron triplets *{i,j,k}* that satisfy *TE(j->i)* and *TE(k->i)* greater than some significance value. This function is unfinished and has yet to be incorporated into `TE_PID.m`.
+* Incorporate `timebin.m` and `TE_tripletfinder` into `TE_PID.m`.
 
 ## Bugs
 

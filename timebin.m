@@ -42,7 +42,8 @@ function [output_timeseries] = timebin(input_timeseries, resolution)
         end
         clear str
     end
-    % Initialize output to contain rows equal to the number of input rows divided by the resolution rounded down.
+    % Initialize output to contain rows equal to the number of input rows
+    % divided by the resolution rounded down.
     output_timeseries = zeros(floor(size(input_timeseries,1)/resolution), size(input_timeseries,2));
     for i = 1:size(output_timeseries,1)
         for j = 1:size(input_timeseries,2)

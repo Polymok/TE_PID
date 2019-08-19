@@ -1,7 +1,12 @@
 % Given two time-series u,v and a maximum time-delay constraint, this
 % function returns the time-lag between the two time-series smaller than
-% the maximal constraint that yields the greatest transfer entropy
-% normalized by the target time-series's entropy.
+% the maximum time-delay constraint that yields the greatest transfer
+% entropy normalized by the target time-series's entropy.
+% 
+% A positive time-lag value means maximal transfer entropy obtains when v
+% lags behind u. A negative time-lag value means maximal transfer entropy
+% obtains when u lags behind v. The structure of transfer entropy procludes
+% time-lag values of 0.
 %
 % This function can only take discrete time-series.
 
@@ -20,7 +25,9 @@ function [timelagged_TE_normed, timelag] = TE_timelag(u,v,max_delay)
         end
     end
     if ~isscalar(max_delay)
-        error('Maximum time lag is not a scalar.')
+        error('Maximum time-lag is not a scalar.')
+    elseif max_delay<1
+        error('Maximum time-lag must be at least 1.')
     elseif size(u,1) ~= size(v,1)
         error('Inputs not of the same length.')
     end
