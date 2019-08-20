@@ -8,7 +8,7 @@ Compute partial information decomposition (PID) on transfer entropy for an input
 
 ## Usage
 
-We identify a neuron with its time-series. To calculate transfer entropy PID for all possible neuron triplets, call `TE_PID.m` with two required arguments: a matrix or cell, and a positive integer time-delay. For an input cell containing multiple matrices for multiple trials, the input cell must be 1-dimensional. Each matrix or cell column should contain the entire time-series of a single neuron. A time-delay is necessary to calculate transfer entropy. Output matrices have 7 columns indicating in increasing order: *target_index*, *source1_index*, *source2_index*, *synergy*, *redundancy*, *unique1*, *unique2*. PID output terms are given in units of bits. Each row of the output matrix contains terms for a specific triplet.
+We identify a neuron with its time-series. To calculate transfer entropy PID for all possible neuron triplets, call `TE_PID.m` with two required arguments: a matrix or cell, and a positive integer time-delay. For an input cell containing multiple matrices for multiple trials, the input cell must be 1-dimensional. Each matrix or cell column should contain the entire time-series of a single neuron, i.e. columns should represent neurons while rows represent observations at incremental times. A time-delay is necessary to calculate transfer entropy. Output matrices have 7 columns indicating in increasing order: *target_index*, *source1_index*, *source2_index*, *synergy*, *redundancy*, *unique1*, *unique2*. PID output terms are given in units of bits. Each row of the output matrix contains terms for a specific triplet.
 
 ### Examples
 
@@ -69,6 +69,8 @@ For *N* neurons, the number of possible neuron triplets is *N\*(N-1)\*(N-2)/2*. 
 ## To do
 
 * Incorporate `timebin.m` and `TE_tripletfinder` into `TE_PID.m`.
+
+* Determine method to filter neuron triplets since calling `TE_PID.m` on all neuron triplets is usually too computationally expensive.
 
 ## Bugs
 

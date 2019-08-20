@@ -4,7 +4,8 @@
 % latter case, the cell must be one-dimensional. Each cell is interpreted
 % as containing time-series of all neurons recorded in a single trial. In
 % both cases, each time-series must be contained in a column of the input
-% matrices.
+% matrices, i.e. columns represent neurons and rows represent observations
+% at certain times.
 %
 % A positive integer time-delay is required to compute transfer entropy
 % values.
