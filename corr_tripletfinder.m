@@ -1,17 +1,18 @@
-% Given a matrix of time-series and a time-delay, this function returns an
-% asymmetric weight matrix of correlation coefficients between each pair of
-% time-series. For each time-series pair ij, if the greater correlation
-% coefficient obtains when j lags behind i, matrix element (i,j) is set to
-% 0. If i lags behind j, matrix element (j,i) is set to 0.
+% Given a matrix of time-series and a time-delay, this function returns a
+% binary directional matrix between each pair of time-series. For each
+% time-series pair ij, if the greater correlation coefficient obtains when
+% j lags behind i, matrix element (j,i) is set to 1. If i lags behind j,
+% matrix element (i,j) is set to 1.
 %
 % This function further returns a list of time-series triplets ijk that
-% satisfies weight_matrix(j,i)>0 and weight_matrix(k,i)>0.
+% satisfies directional_matrix(j,i)=1 and directional_matrix(k,i)=1.
 %
-% Pearson's correlation coefficient is used to construct the weight matrix.
+% Pearson's correlation coefficient is used to construct the directional
+% matrix.
 %
 % This function can only take scalar-valued time-series.
 
-function [output_triplets, weight_matrix] = corr_tripletfinder(input_timeseries, delay)
+function [output_triplets, directional_matrix] = corr_tripletfinder(input_timeseries, delay)
     if ~ismatrix(input_timeseries)
         error('Input is not a matrix.')
     elseif ~isscalar(delay)
@@ -22,7 +23,7 @@ function [output_triplets, weight_matrix] = corr_tripletfinder(input_timeseries,
             input_timeseries = input_timeseries';
         end
     end
-    weight_matrix = corrcoef(input_timeseries);
+    directional_matrix = zeros(size(input_timeseries,2), size(input_timeseries,2));
     for i = 1:size(input_timeseries,2)
         for j = (i+1):size(input_timeseries,2)
             i_past = input_timeseries(:,i);
@@ -36,9 +37,9 @@ function [output_triplets, weight_matrix] = corr_tripletfinder(input_timeseries,
             i_to_j = corrcoef(i_past, j_future);
             j_to_i = corrcoef(j_past, i_future);
             if i_to_j(1,2) > j_to_i(1,2)
-                weight_matrix(j,i) = 0;
+                directional_matrix(i,j) = 1;
             elseif i_to_j(1,2) < j_to_i(1,2)
-                weight_matrix(i,j) = 0;
+                directional_matrix(j,i) = 1;
             end
         end
     end
@@ -51,7 +52,7 @@ function [output_triplets, weight_matrix] = corr_tripletfinder(input_timeseries,
                 for k = (j+1):(size(input_timeseries,2)) % Source neuron 2.
                     if i==k
                     else
-                        if (weight_matrix(j,i)>0) && (weight_matrix(k,i)>0)
+                        if (directional_matrix(j,i)==1) && (directional_matrix(k,i)==1)
                             output_triplets(row_index,:) = [i j k];
                             row_index = row_index+1;
                         end
