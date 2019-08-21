@@ -17,28 +17,55 @@ Call `TE_PID.m` with test case matrix variables `{identity, xor, and}` stored in
 ```
 >> cd ~/TE_PID  
 >> load test_logicgates.mat  
->> TE_PID(identity, 1)  
+>> TE_PID(identity, 1);  
+Time bin input time-series? y/n: n  
+Enter output file name: identity_results.csv  
 ...  
-ans =  
-  1 2 3 0 0 1 0  
-  ...  
->> TE_PID(xor, 1)  
+>> type identity_results.csv  
+
+Target, Source1, Source2, Synergy, Redundancy, Unique1, Unique2  
+1, 2, 3, 1, 1, 0, -1  
+3, 1, 2, 0.235339, 0.0689627, 0.000788227, 0.000788227  
+2, 3, 1, 0.311278, 0, 0, 0.188722  
+>> TE_PID(xor, 1);  
+Time bin input time-series? y/n: n  
+Enter output file name: xor_results.csv  
 ...  
-ans =  
-  1 2 3 1 0 0 0  
-  ...  
->> TE_PID(and, 1)  
+>> type xor_results.csv  
+
+Target, Source1, Source2, Synergy, Redundancy, Unique1, Unique2  
+1, 2, 3, 1, 0, 0, 0  
+3, 1, 2, 0.128529, 0.062128, 0.000175672, 0.0314032  
+2, 3, 1, 0.106115, 0.0865255, 0.000244657, -0.0242218  
+>> TE_PID(and, 1);  
+Time bin input time-series? y/n: n  
+Enter output file name: and_results.csv  
 ...  
-ans =  
-  1 2 3 0.5439  0.3113  0.0724  0.0724  
-  ...
+>> type and_results.csv  
+
+Target, Source1, Source2, Synergy, Redundancy, Unique1, Unique2  
+1, 2, 3, 0.543901, 0.311278, 0.0724104, 0.0724104  
+3, 1, 2, 0.264169, 0.257856, 0.00294723, -0.23318  
+2, 3, 1, 0.0612781, 0.0487949, -2.77556e-17, 0.155639
 ```
 
 In all three test variables, the first column contains the target time-series of interest. Therefore, we check the first row of the output matrix where *target_index = 1* to verify that our code runs as expected. Note that since transfer entropy splits the target time-series into a future time-series and a past time-series, test cases have their first column shifted by one.
 
 As expected, all transfer entropy information is found in *unique1* for the `identity` test case, *synergy* for the `xor` relation.
 
-In the case of `and`, small values obtain for *unique1* and *unique2*, contrary to the expected zero value, and the *synergy* is slightly larger than the expected *0.5* bits. This is due to a discrepancy between the unnormalized and normalized transfer entropies. The entropy of the target time-series is *H(target) = -0.25\*log(0.25)-0.75\*log(0.75) = 0.8113*. The unnormalized transfer entropies are *TE(source1->target) = TE(source2->target) = 0.3113 = redundancy*, and *TE({source1,source2}->target) = 0.8113*. Therefore, the normalized transfer entropies are *normed_TE(source1->target) = normed_TE(source2->target) = 0.3837 > redundancy* and *normed_TE({source1,source2}->target) = 1*.
+In the case of `and`, small values obtain for *unique1* and *unique2*, contrary to the expected zero value, and the *synergy* is slightly larger than the expected *0.5* bits. This is due to a discrepancy between the unnormalized and normalized transfer entropies. The entropy of the target time-series is  
+
+*H(target) = -0.25\*log(0.25)-0.75\*log(0.75) = 0.811278*.
+
+The unnormalized transfer entropies are  
+
+*TE(source1->target) = TE(source2->target) = 0.311278 = redundancy*  
+*TE({source1,source2}->target) = 0.811278*.
+
+Therefore, the normalized transfer entropies are
+
+*normed_TE(source1->target) = normed_TE(source2->target) = 0.383688 > redundancy*  
+*normed_TE({source1,source2}->target) = 1*.
 
 ## Functions
 
@@ -61,11 +88,13 @@ For *N* neurons, the number of possible neuron triplets is *N\*(N-1)\*(N-2)/2*. 
 
 ### Call structure
 
-`TE_PID.m`            calls `I_min_TE.m`, `TE.m`, and optionally `timebin.m`  
-`I_min_TE.m`          calls `I_spec.m`  
-`TE_tripletfinder.m`  calls `TE_timelag.m`  
-`TE_timelag.m`        calls `TE.m`  
-`TE.m`                calls `cond_MI.m`  
+| Parent function      | Child function [optional]         |
+|----------------------|-----------------------------------|
+| `TE_PID.m`           | `I_min_TE.m` `TE.m` [`timebin.m`] |
+| `I_min_TE.m`         | `I_spec.m`                        |
+| `TE_tripletfinder.m` | `TE_timelag.m`                    |
+| `TE_timelag.m`       | `TE.m`                            |
+| `TE.m`               | `cond_MI.m`                       |
 
 ## Bugs
 

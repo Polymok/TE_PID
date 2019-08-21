@@ -18,7 +18,7 @@
 % containing a nx3 matrix. If this optional argument is not given, this
 % function will calculate PID for all possible triplets.
 %
-% This function returns as output a matrix of unique, synergistic, and
+% This function writes to output file a matrix of unique, synergistic, and
 % redundant partial information terms of transfer entropy between all
 % possible neuron triads. The redundant partial information is taken to be
 % equal to the minimum information function as defined by Williams and
@@ -30,7 +30,7 @@
 % PID is calculated for all neuron triplets. If N simultaneously recorded
 % time-series are given, N*(N-1)*(N-2)/2 triplets are returned.
 
-function [output_data] = TE_PID(input_data, delay, triplet_list)
+function [] = TE_PID(input_data, delay, triplet_list)
     if ~isscalar(delay)
         error('Input time-delay must be a scalar.')
     elseif (round(delay)~=delay) || (delay<1)
@@ -62,18 +62,17 @@ function [output_data] = TE_PID(input_data, delay, triplet_list)
             end
         end
         % Time bin functionality.
-%         str = input('Time bin input time-series? y/n: ', 's');
-%         if str == 'y'
-%             resolution = input('Choose a time resolution. Please input a positive integer: ');
-%             while ~isscalar(resolution)
-%                 resolution = input('Time resolution must be a scalar. Please input a positive integer: ');
-%             end
-%             input_data = timebin(input_data, resolution);
-%         end
-%         clear str
-        output_data = zeros(size(triplet_list,1), 7); % Initialize output matrix for a single trial. 7 total indices: target, source1, source2, synergy, redundancy, unique1, unique2.
-        % Initialize row index to write outputs to output_matrix.
-        row_index = 1;
+        str = input('Time bin input time-series? y/n: ', 's');
+        if str == 'y'
+            resolution = input('Choose a time resolution. Please input a positive integer: ');
+            while ~isscalar(resolution)
+                resolution = input('Time resolution must be a scalar. Please input a positive integer: ');
+            end
+            input_data = timebin(input_data, resolution);
+        end
+        str = input('Enter output file name: ', 's');
+        output_file = fopen(str, 'a');
+        fprintf(output_file, 'Target, Source1, Source2, Synergy, Redundancy, Unique1, Unique2\n');
         % Import all neuron triplets from triplet_list.
         for i = 1:(size(triplet_list,1))
             redundancy = I_min_TE(input_data(:,triplet_list(i,1)), input_data(:,triplet_list(i,2)), input_data(:,triplet_list(i,2)), delay);
@@ -83,9 +82,10 @@ function [output_data] = TE_PID(input_data, delay, triplet_list)
             unique1 = TE1 - redundancy;
             unique2 = TE2 - redundancy;
             synergy =  TE12 - redundancy - unique1 - unique2;
-            output_data(row_index,:) = [triplet_list(i,:) synergy redundancy unique1 unique2]; % Write to row of output_matrix indicated by row_index.
-            row_index = row_index+1; % Increment row index by 1.
+            output_data = [triplet_list(i,1); triplet_list(i,2); triplet_list(i,3); synergy; redundancy; unique1; unique2];
+            fprintf(output_file, '%1u, %1u, %1u, %.6g, %.6g, %.6g, %.6g\n', output_data);
         end
+        fclose(output_file);
     % Case: input is a cell containing multiple trials.
     elseif iscell(input_data)
         if (size(input_data,1) ~= 1) && (size(input_data,2) ~= 1)
@@ -93,16 +93,15 @@ function [output_data] = TE_PID(input_data, delay, triplet_list)
         elseif size(input_data,1) > size(input_data,2)
             input_data = input_data';
         end
-        output_data = cell(1, size(input_data,2)); % Initialize output cell array.
         for trial = 1:size(input_data,2)
             input_matrix = input_data{1, trial};
             % Check if optional triplet list is given.
             if nargin == 2
-                output_matrix = TE_PID(input_matrix, delay); % Feed extracted matrix back into function.
+                TE_PID(input_matrix, delay); % Feed extracted matrix back into function.
             elseif nargin == 3
                 % Check if given triplet list is a matrix or a cell.
                 if ismatrix(triplet_list)
-                    output_matrix = TE_PID(input_matrix, delay, triplet_list);
+                    TE_PID(input_matrix, delay, triplet_list);
                 elseif iscell(triplet_list)
                     if (size(triplet_list,1) ~= 1) && (size(triplet_list,2) ~= 1)
                         error('Input cell of triplet lists must be one-dimensional.')
@@ -110,10 +109,9 @@ function [output_data] = TE_PID(input_data, delay, triplet_list)
                         triplet_list = triplet_list';
                     end
                     triplet_matrix = triplet_list{1, trial};
-                    output_matrix = TE_PID(input_matrix, delay, triplet_matrix);
+                    TE_PID(input_matrix, delay, triplet_matrix);
                 end
             end
-            output_data{1, trial} = output_matrix; % Write resulting PID values for each trial back into output cell.
         end
     else
         error('Input dataset must be a cell or a matrix.')
