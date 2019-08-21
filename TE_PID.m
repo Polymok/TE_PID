@@ -10,6 +10,7 @@
 % A positive integer time-delay is required to compute transfer entropy
 % values.
 %
+
 % This function returns as output a matrix of unique, synergistic, and
 % redundant partial information terms of transfer entropy between all
 % possible neuron triads. The redundant partial information is taken to be
@@ -38,6 +39,16 @@ function [output_data] = TE_PID(input_data, delay)
             end
             clear str
         end
+% Time bin functionality.
+%         str = input('Time bin input time-series? y/n: ', 's');
+%         if str == 'y'
+%             resolution = input('Choose a time resolution. Please input a positive integer: ');
+%             while ~isscalar(resolution)
+%                 resolution = input('Time resolution must be a scalar. Please input a positive integer: ');
+%             end
+%             input_data = timebin(input_data, resolution);
+%         end
+%         clear str
         output_data = zeros(size(input_data,2)*(size(input_data,2)-1)*(size(input_data,2)-2)/2, 7); % Initialize output matrix for a single trial. 7 total indices: target, source1, source2, synergy, redundancy, unique1, unique2.
         % Initialize row index to write outputs to output_matrix.
         row_index = 1;
