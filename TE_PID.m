@@ -30,7 +30,7 @@
 % PID is calculated for all neuron triplets. If N simultaneously recorded
 % time-series are given, N*(N-1)*(N-2)/2 triplets are returned.
 
-function [] = TE_PID(input_data, delay, triplet_list)
+function TE_PID(input_data, delay, triplet_list)
     if ~isscalar(delay)
         error('Input time-delay must be a scalar.')
     elseif (round(delay)~=delay) || (delay<1)
@@ -47,8 +47,9 @@ function [] = TE_PID(input_data, delay, triplet_list)
         end
         % Check if optional triplet list is given.
         if nargin == 2 || isempty(triplet_list)
-            vector_neurons = 1:size(input_data,2);
-            target_1 = nchoosek(vector_neurons,3);
+            % Generate list of all possible triplets.
+            number_of_neurons_vector = 1:size(input_data,2);
+            target_1 = nchoosek(number_of_neurons_vector,3);
             target_2 = circshift(target_1,1,2);
             target_3 = circshift(target_1,-1,2);
             triplet_list = [target_1; target_2; target_3];
@@ -70,6 +71,7 @@ function [] = TE_PID(input_data, delay, triplet_list)
             end
             input_data = timebin(input_data, resolution);
         end
+        % Write output to separate file.
         str = input('Enter output file name: ', 's');
         output_file = fopen(str, 'a');
         fprintf(output_file, 'Target, Source1, Source2, Synergy, Redundancy, Unique1, Unique2\n');
