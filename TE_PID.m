@@ -30,7 +30,7 @@ function [output_data] = TE_PID(input_data, delay)
         error('Input time-delay is not a positive integer.')
     end
     % Case: input is a matrix containing a single trial.
-    if isa(input_data, 'double') || isa(input_data, 'single')
+    if ismatrix(input_data)
         % Check if a single time-series is contained in a column.
         if size(input_data,1) < size(input_data,2)
             str = input('Input matrix has greater number of columns than rows. Each column should contain the entire time-series of a single neuron. Transpose input matrix? y/n: ','s');
@@ -75,7 +75,7 @@ function [output_data] = TE_PID(input_data, delay)
             end
         end
     % Case: input is a cell containing multiple trials.
-    elseif isa(input_data, 'cell')
+    elseif iscell(input_data)
         if (size(input_data,1) ~= 1) && (size(input_data,2) ~= 1)
             error('Input is not a one-dimensional cell.')
         elseif size(input_data,1) > size(input_data,2)
@@ -84,39 +84,7 @@ function [output_data] = TE_PID(input_data, delay)
         output_data = cell(1, size(input_data,2)); % Initialize output cell array.
         for trial = 1:size(input_data,2)
             input_matrix = input_data{1, trial};
-            % Check if a single time-series is contained in a column.
-            if size(input_matrix,1) < size(input_matrix,2)
-                str = input('Input matrix has greater number of columns than rows. Each column should contain the entire time-series of a single neuron. Transpose input matrix? y/n: ','s');
-                if str == 'y'
-                    input_matrix = input_matrix';
-                end
-                clear str
-            end
-            output_matrix = zeros(size(input_matrix,2)*(size(input_matrix,2)-1)*(size(input_matrix,2)-2)/2, 7); % Initialize output matrix for a single trial. 7 total indices: target, source1, source2, synergy, redundancy, unique1, unique2.
-            % Initialize row index to write outputs to output_matrix.
-            row_index = 1;
-            % Pick out all neuron triplets.
-            for i = 1:(size(input_matrix,2)) % Target neuron.
-                for j = 1:(size(input_matrix,2)-1) % Source neuron 1.
-                    if i==j
-                    else
-                        for k = (j+1):(size(input_matrix,2)) % Source neuron 2.
-                            if i==k
-                            else
-                                redundancy = I_min_TE(input_matrix(:,i), input_matrix(:,j), input_matrix(:,k), delay);
-                                [~, TE1] = TE(input_matrix(:,i), input_matrix(:,j), delay); % Use transfer entropy normalized by entropy of target.
-                                [~, TE2] = TE(input_matrix(:,i), input_matrix(:,k), delay);
-                                [~, TE12] = TE(input_matrix(:,i), [input_matrix(:,j) input_matrix(:,k)], delay);
-                                unique1 = TE1 - redundancy;
-                                unique2 = TE2 - redundancy;
-                                synergy =  TE12 - redundancy - unique1 - unique2;
-                                output_matrix(row_index,:) = [i j k synergy redundancy unique1 unique2]; % Write to row of output_matrix indicated by row index.
-                                row_index = row_index+1; % Increment row index by 1.
-                            end
-                        end
-                    end
-                end
-            end
+            output_matrix = TE_PID(input_matrix, delay); % Feed extracted matrix back into function.
             output_data{1, trial} = output_matrix;
         end
     else
