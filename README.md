@@ -8,7 +8,7 @@ Compute partial information decomposition (PID) on transfer entropy for an input
 
 ## Usage
 
-We identify a neuron with its time-series. To calculate transfer entropy PID for all possible neuron triplets, call `TE_PID.m` with two required arguments: a matrix or cell, and a positive integer time-delay. For an input cell containing multiple matrices for multiple trials, the input cell must be 1-dimensional. Each matrix or cell column should contain the entire time-series of a single neuron, i.e. columns should represent neurons while rows represent observations at incremental times. A time-delay is necessary to calculate transfer entropy. Output matrices have 7 columns indicating in increasing order: *target_index*, *source1_index*, *source2_index*, *synergy*, *redundancy*, *unique1*, *unique2*. PID output terms are given in units of bits. Each row of the output matrix contains terms for a specific triplet.
+We identify a neuron with its time-series. To calculate transfer entropy PID for all possible neuron triplets, call `TE_PID.m` with two required arguments: a matrix or cell, and a positive integer time-delay. Optionally, supply a list of neuron triplet indices for which to calculate PID. For an input cell containing multiple matrices for multiple trials, the input cell must be 1-dimensional. Each matrix or cell column should contain the entire time-series of a single neuron, i.e. columns should represent neurons while rows represent observations at incremental times. A time-delay is necessary to calculate transfer entropy. Output matrices have 7 columns indicating in increasing order: *target_index*, *source1_index*, *source2_index*, *synergy*, *redundancy*, *unique1*, *unique2*. PID output terms are given in units of bits. Each row of the output matrix contains terms for a specific triplet.
 
 ### Examples
 
@@ -44,15 +44,16 @@ In the case of `and`, small values obtain for *unique1* and *unique2*, contrary 
 
 ### `TE_PID.m`
 
-`TE_PID.m`(*time-series*, *time-delay*)  
+`TE_PID.m`(*time-series*, *time-delay*, *triplet_list*)  
 Given input matrices and a scalar time-delay, calculate PID terms for transfer entropy.
 
-For *N* neurons, the number of possible neuron triplets is *N\*(N-1)\*(N-2)/2*. Consequently for large *N*, `TE_PID.m` is computationally intensive.
+For *N* neurons, the number of possible neuron triplets is *N\*(N-1)\*(N-2)/2*. Consequently for large *N*, `TE_PID.m` is computationally intensive if *triplet_list* is not given.
 
 #### Parameters:
 
 *time-series*: MATLAB matrix or 1-dimensional cell. Columns should contain entire time-series of a given neuron.  
-*time-delay*: positive integer scalar.
+*time-delay*: positive integer scalar.  
+*triplet_list*: optional *nx3* matrix of neuron indices. The first column should represent the target neuron index. If *time-series* is a cell, then *triplet_list* should either be a cell with equal dimensions—each cell element containing a triplet list—or a matrix—in which case PID calculations for all trials are restricted to triplets contained in the single matrix. If not given, PID is calculated for all possible triplets.
 
 #### Returns:
 
@@ -60,17 +61,11 @@ For *N* neurons, the number of possible neuron triplets is *N\*(N-1)\*(N-2)/2*. 
 
 ### Call structure
 
-`TE_PID.m`            calls `I_min_TE.m`, `TE.m`  
+`TE_PID.m`            calls `I_min_TE.m`, `TE.m`, and optionally `timebin.m`  
 `I_min_TE.m`          calls `I_spec.m`  
 `TE_tripletfinder.m`  calls `TE_timelag.m`  
 `TE_timelag.m`        calls `TE.m`  
 `TE.m`                calls `cond_MI.m`  
-
-## To do
-
-* Incorporate `timebin.m` and `TE_tripletfinder` into `TE_PID.m`.
-
-* Determine method to filter neuron triplets since calling `TE_PID.m` on all neuron triplets is usually too computationally expensive.
 
 ## Bugs
 
