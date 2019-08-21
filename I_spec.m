@@ -17,11 +17,7 @@ function [spec_info] = I_spec(target, target_future_value, delay, opt_source)
         error('Input time-delay is not a scalar.')
     elseif (round(delay)~=delay) || (delay<1)
         error('Input time-delay is not a positive integer.')
-    end
-    % Ensure target time-series is a column vector.
-    target = target(:);
-    % Initialize output.
-    spec_info = 0; 
+    end 
     % Check if optional argument is given.
     if nargin == 4
         % Check if time-series inputs are of acceptable type and length.
@@ -30,63 +26,41 @@ function [spec_info] = I_spec(target, target_future_value, delay, opt_source)
         elseif (length(target)~=length(opt_source))
             error('Input time-series are not of the same length.')
         end
-        % Ensure optional time-series is a column vector.
-        opt_source = opt_source(:);
-        % Create past and future time-series for target using given
-        % time-delay by removing elements at start or end of time-series.
-        target_future = target;
-        target_future(1:delay) = [];
-        target_past = target;
-        target_past((length(target)-delay+1):length(target)) = [];
-        opt_source((length(opt_source)-delay+1):length(opt_source)) = [];
-        % Sum over all possible values that the two time-series may take.
-        for i = unique(target_past')
-            for j = unique(opt_source')
-                % Record number of instances instead of probability.
-                jointprob = sum(sum([opt_source target_past target_future]==[j i target_future_value],2)==3);
-                % Discard cases with probability zero.
-                if jointprob == 0
-                    disp(['Pr(source,target_future,target_past=', num2str(j), ',', num2str(target_future_value), ',', num2str(i), ') is zero. Case discarded.'])
-                else
-                    futureprob = sum(target_future==target_future_value);
-                    if futureprob == 0
-                    else
-                        pastprob = sum(sum([opt_source target_past]==[j i],2)==2);
-                        if pastprob == 0
-                        else
-                        spec_info = spec_info + jointprob / futureprob * log(jointprob / pastprob / futureprob * length(target_future)) / log(2);
-                        end
-                    end
-                end
-            end
-        end
-    % Optional time-series input is not given in this case.
     elseif nargin == 3
-        % Create past and future time-series for target using given
-        % time-delay by truncating at start or end of time-series.
-        target_future = target;
-        target_future(1:delay) = [];
-        target_past = target;
-        target_past((length(target)-delay+1):length(target)) = [];
-        % Sum over all possible values that the time-series may take.
-        for i = unique(target_past')
-            jointprob = sum(sum([target_past target_future]==[i target_future_value],2)==2);
+        opt_source = zeros(length(target),1);
+    else
+        error('Number of arguments must be 3 or 4.')
+    end
+    % Ensure time-series are column vectors.
+    target = target(:);
+    opt_source = opt_source(:);
+    % Create past and future time-series for target using given time-delay
+    % by removing elements at start or end of time-series.
+    target_future = target;
+    target_future(1:delay) = [];
+    target_past = target;
+    target_past((length(target)-delay+1):length(target)) = [];
+    opt_source((length(opt_source)-delay+1):length(opt_source)) = [];
+    spec_info = 0; % Initialize output.
+    % Sum over all possible values that the two time-series may take.
+    for i = unique(target_past')
+        for j = unique(opt_source')
+            % Record number of instances instead of probability.
+            jointprob = sum(sum([opt_source target_past target_future]==[j i target_future_value],2)==3);
             % Discard cases with probability zero.
             if jointprob == 0
-                disp(['Pr(target_past,target_future=', num2str(i), ',', num2str(target_future_value), ') is zero. Case discarded.'])
+                disp(['Pr(source,target_future,target_past=', num2str(j), ',', num2str(target_future_value), ',', num2str(i), ') is zero. Case discarded.'])
             else
                 futureprob = sum(target_future==target_future_value);
                 if futureprob == 0
                 else
-                    pastprob = sum(target_past==i);
+                    pastprob = sum(sum([opt_source target_past]==[j i],2)==2);
                     if pastprob == 0
                     else
-                        spec_info = spec_info + jointprob / futureprob * log(jointprob / pastprob / futureprob * length(target_future)) / log(2);
+                    spec_info = spec_info + jointprob / futureprob * log(jointprob / pastprob / futureprob * length(target_future)) / log(2);
                     end
                 end
             end
         end
-    else
-        error('Number of arguments must be 3 or 4.')
     end
 end
