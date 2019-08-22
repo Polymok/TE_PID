@@ -8,7 +8,7 @@ Compute partial information decomposition (PID) on transfer entropy for an input
 
 ## Usage
 
-We identify a neuron with its time-series. To calculate transfer entropy PID for all possible neuron triplets, call `TE_PID.m` with 3 required arguments: an output filename, a matrix or cell, and a positive integer time-delay. For an input cell containing multiple matrices for multiple trials, the input cell must be 1-dimensional. Each matrix or cell column should contain the entire time-series of a single neuron, i.e. columns should represent neurons while rows represent observations at incremental times. Optionally, supply a list of neuron triplet indices for which to calculate PID. Otherwise, PID is calculated for all possible triplets. Optionally, supply a positive integer scalar time-resolution at which to time bin input data.
+We identify a neuron with its time-series. To calculate transfer entropy PID for all possible neuron triplets, call `TE_PID.m` with 3 required arguments: an output filename, a matrix or cell, and a positive integer time-delay. For an input cell containing multiple matrices for multiple trials, the input cell must be 1-dimensional. Each matrix or cell column should contain the entire time-series of a single neuron, i.e. columns should represent neurons while rows represent observations at incremental times. Optionally, supply a list of neuron triplet indices for which to calculate PID. Otherwise, PID is calculated for all possible triplets. Optionally, supply a positive integer time-resolution at which to time bin input data.
 
 Outputs are written to a separate file. 7 columns indicate in increasing order: *target_index*, *source1_index*, *source2_index*, *synergy*, *redundancy*, *unique1*, *unique2*. PID output terms are given in units of bits. Each row of the output matrix contains terms for a specific triplet.
 
@@ -24,7 +24,7 @@ Call `TE_PID.m` with test case matrix variables `{identity, xor, and}` stored in
 >> type identity_output.csv  
 
 Target, Source1, Source2, Synergy, Redundancy, Unique1, Unique2  
-1, 2, 3, 1, 1, 0, -1  
+1, 2, 3, 0, 0, 1, 0  
 3, 1, 2, 0.235339, 0.0689627, 0.000788227, 0.000788227  
 2, 3, 1, 0.311278, 0, 0, 0.188722  
 >> TE_PID('xor_output.csv', xor, 1);  
@@ -34,15 +34,15 @@ Target, Source1, Source2, Synergy, Redundancy, Unique1, Unique2
 Target, Source1, Source2, Synergy, Redundancy, Unique1, Unique2  
 1, 2, 3, 1, 0, 0, 0  
 3, 1, 2, 0.128529, 0.062128, 0.000175672, 0.0314032  
-2, 3, 1, 0.106115, 0.0865255, 0.000244657, -0.0242218  
+2, 3, 1, 0.081717, 0.062128, 0.0246421, 0.000175672  
 >> TE_PID('and_output.csv', and, 1);  
 ...  
 >> type and_output.csv  
 
 Target, Source1, Source2, Synergy, Redundancy, Unique1, Unique2  
 1, 2, 3, 0.543901, 0.311278, 0.0724104, 0.0724104  
-3, 1, 2, 0.264169, 0.257856, 0.00294723, -0.23318  
-2, 3, 1, 0.0612781, 0.0487949, -2.77556e-17, 0.155639
+3, 1, 2, 0.0307104, 0.0243975, 0.236406, 0.000278857  
+2, 3, 1, 0.0612781, 0.0487949, -2.77556e-17, 0.155639  
 ```
 
 In all three test variables, the first column contains the target time-series of interest. Therefore, we check the first row of the output matrix where *target_index = 1* to verify that our code runs as expected. Note that since transfer entropy splits the target time-series into a future time-series and a past time-series, test cases have their first column shifted by one.
@@ -78,7 +78,7 @@ For *N* neurons, the number of possible neuron triplets is *N\*(N-1)\*(N-2)/2*. 
 *time-series*: matrix or 1-dimensional cell. Columns should contain entire time-series of a given neuron.  
 *time-delay*: positive integer scalar.  
 *triplet_list*: [optional] *nx3* matrix of neuron indices. The first column should represent the target neuron index. If *time-series* is a cell, then *triplet_list* should either be a cell with equal dimensions—each cell element containing a triplet list—or a matrix—in which case PID calculations for all trials are restricted to triplets contained in the single matrix. If not given, PID is calculated for all possible triplets.  
-*time_resolution*: [optional] positive integer scalar. Time bins at given *time_resolution* by partitioning input time-series. If a 1 occurs within a partition, a 1 is recorded. Otherwise, a 0 is recorded. 
+*time_resolution*: [optional] positive integer scalar. Time bins at given *time_resolution* by partitioning input time-series. If a 1 occurs within a partition, a 1 is recorded. Otherwise, a 0 is recorded.
 
 #### Outputs:
 

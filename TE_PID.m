@@ -79,7 +79,7 @@ function TE_PID(output_filename, input_data, delay, triplet_list, time_resolutio
         fprintf(output_file, 'Target, Source1, Source2, Synergy, Redundancy, Unique1, Unique2\n');
         % Import all neuron triplets from triplet_list.
         for i = 1:(size(triplet_list,1))
-            redundancy = I_min_TE(input_data(:,triplet_list(i,1)), input_data(:,triplet_list(i,2)), input_data(:,triplet_list(i,2)), delay);
+            redundancy = I_min_TE(input_data(:,triplet_list(i,1)), input_data(:,triplet_list(i,2)), input_data(:,triplet_list(i,3)), delay);
             [~, TE1] = TE(input_data(:,triplet_list(i,1)), input_data(:,triplet_list(i,2)), delay); % Use transfer entropy normalized by entropy of target.
             [~, TE2] = TE(input_data(:,triplet_list(i,1)), input_data(:,triplet_list(i,3)), delay);
             [~, TE12] = TE(input_data(:,triplet_list(i,1)), [input_data(:,triplet_list(i,2)) input_data(:,triplet_list(i,3))], delay);
@@ -100,12 +100,20 @@ function TE_PID(output_filename, input_data, delay, triplet_list, time_resolutio
         for trial = 1:size(input_data,2)
             input_matrix = input_data{1, trial};
             % Check if optional triplet list is given.
-            if nargin == 2
-                TE_PID(output_filename, input_matrix, delay); % Feed extracted matrix back into function.
-            elseif nargin == 3
+            if nargin == 3 || isempty(triplet_list)
+                if nargin==5
+                    TE_PID(output_filename, input_matrix, delay, [], time_resolution);
+                else
+                    TE_PID(output_filename, input_matrix, delay);
+                end
+            else
                 % Check if given triplet list is a matrix or a cell.
                 if ismatrix(triplet_list)
-                    TE_PID(output_filename, input_matrix, delay, triplet_list);
+                    if nargin==5
+                        TE_PID(output_filename, input_matrix, delay, triplet_list, time_resolution);
+                    else
+                        TE_PID(output_filename, input_matrix, delay, triplet_list);
+                    end
                 elseif iscell(triplet_list)
                     if (size(triplet_list,1) ~= 1) && (size(triplet_list,2) ~= 1)
                         error('Input cell of triplet lists must be one-dimensional.')
@@ -113,7 +121,11 @@ function TE_PID(output_filename, input_data, delay, triplet_list, time_resolutio
                         triplet_list = triplet_list';
                     end
                     triplet_matrix = triplet_list{1, trial};
-                    TE_PID(output_filename, input_matrix, delay, triplet_matrix);
+                    if nargin==5
+                        TE_PID(output_filename, input_matrix, delay, triplet_matrix, time_resolution);
+                    else
+                        TE_PID(output_filename, input_matrix, delay, triplet_matrix);
+                    end
                 end
             end
         end
