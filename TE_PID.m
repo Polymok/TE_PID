@@ -30,11 +30,13 @@
 % PID is calculated for all neuron triplets. If N simultaneously recorded
 % time-series are given, N*(N-1)*(N-2)/2 triplets are returned.
 
-function TE_PID(input_data, delay, triplet_list)
+function TE_PID(output_filename, input_data, delay, triplet_list, time_resolution)
     if ~isscalar(delay)
         error('Input time-delay must be a scalar.')
     elseif (round(delay)~=delay) || (delay<1)
         error('Input time-delay must be a positive integer.')
+    elseif ~isstring(output_filename) && ~ischar(output_filename)
+        error('Output filename must be entered as a string or char.')
     end
     % Case: input is a matrix containing a single trial.
     if ismatrix(input_data)
@@ -46,14 +48,14 @@ function TE_PID(input_data, delay, triplet_list)
             end
         end
         % Check if optional triplet list is given.
-        if nargin == 2 || isempty(triplet_list)
+        if nargin==3 || isempty(triplet_list)
             % Generate list of all possible triplets.
             number_of_neurons_vector = 1:size(input_data,2);
             target_1 = nchoosek(number_of_neurons_vector,3);
             target_2 = circshift(target_1,1,2);
             target_3 = circshift(target_1,-1,2);
             triplet_list = [target_1; target_2; target_3];
-        elseif nargin == 3
+        else
             if ~ismatrix(triplet_list)
                 error('List of neuron triplets must be a matrix.')
             elseif size(triplet_list,2) ~= 3
@@ -62,18 +64,18 @@ function TE_PID(input_data, delay, triplet_list)
                 error('Neuron indices in given triplet list must not be greater than total number of neurons in input dataset.')
             end
         end
-        % Time bin functionality.
-        str = input('Time bin input time-series? y/n: ', 's');
-        if str == 'y'
-            resolution = input('Choose a time resolution. Please input a positive integer: ');
-            while ~isscalar(resolution)
-                resolution = input('Time resolution must be a scalar. Please input a positive integer: ');
+        % Check if optional time resolution is given.
+        if nargin==5
+            if ~isscalar(time_resolution)
+                error('Time resolution must be a scalar.')
+            elseif (round(time_resolution)~=time_resolution) || (time_resolution<1)
+                error('Time resolution must a positive integer.')
+            else
+                input_data = timebin(input_data, time_resolution);
             end
-            input_data = timebin(input_data, resolution);
         end
         % Write output to separate file.
-        str = input('Enter output file name: ', 's');
-        output_file = fopen(str, 'a');
+        output_file = fopen(output_filename, 'a');
         fprintf(output_file, 'Target, Source1, Source2, Synergy, Redundancy, Unique1, Unique2\n');
         % Import all neuron triplets from triplet_list.
         for i = 1:(size(triplet_list,1))
@@ -99,11 +101,11 @@ function TE_PID(input_data, delay, triplet_list)
             input_matrix = input_data{1, trial};
             % Check if optional triplet list is given.
             if nargin == 2
-                TE_PID(input_matrix, delay); % Feed extracted matrix back into function.
+                TE_PID(output_filename, input_matrix, delay); % Feed extracted matrix back into function.
             elseif nargin == 3
                 % Check if given triplet list is a matrix or a cell.
                 if ismatrix(triplet_list)
-                    TE_PID(input_matrix, delay, triplet_list);
+                    TE_PID(output_filename, input_matrix, delay, triplet_list);
                 elseif iscell(triplet_list)
                     if (size(triplet_list,1) ~= 1) && (size(triplet_list,2) ~= 1)
                         error('Input cell of triplet lists must be one-dimensional.')
@@ -111,7 +113,7 @@ function TE_PID(input_data, delay, triplet_list)
                         triplet_list = triplet_list';
                     end
                     triplet_matrix = triplet_list{1, trial};
-                    TE_PID(input_matrix, delay, triplet_matrix);
+                    TE_PID(output_filename, input_matrix, delay, triplet_matrix);
                 end
             end
         end

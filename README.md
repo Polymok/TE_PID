@@ -8,7 +8,7 @@ Compute partial information decomposition (PID) on transfer entropy for an input
 
 ## Usage
 
-We identify a neuron with its time-series. To calculate transfer entropy PID for all possible neuron triplets, call `TE_PID.m` with two required arguments: a matrix or cell, and a positive integer time-delay. For an input cell containing multiple matrices for multiple trials, the input cell must be 1-dimensional. Each matrix or cell column should contain the entire time-series of a single neuron, i.e. columns should represent neurons while rows represent observations at incremental times. Optionally, supply a list of neuron triplet indices for which to calculate PID. Otherwise, PID is calculated for all possible triplets.
+We identify a neuron with its time-series. To calculate transfer entropy PID for all possible neuron triplets, call `TE_PID.m` with 3 required arguments: an output filename, a matrix or cell, and a positive integer time-delay. For an input cell containing multiple matrices for multiple trials, the input cell must be 1-dimensional. Each matrix or cell column should contain the entire time-series of a single neuron, i.e. columns should represent neurons while rows represent observations at incremental times. Optionally, supply a list of neuron triplet indices for which to calculate PID. Otherwise, PID is calculated for all possible triplets. Optionally, supply a positive integer scalar time-resolution at which to time bin input data.
 
 Outputs are written to a separate file. 7 columns indicate in increasing order: *target_index*, *source1_index*, *source2_index*, *synergy*, *redundancy*, *unique1*, *unique2*. PID output terms are given in units of bits. Each row of the output matrix contains terms for a specific triplet.
 
@@ -19,31 +19,25 @@ Call `TE_PID.m` with test case matrix variables `{identity, xor, and}` stored in
 ```
 >> cd ~/TE_PID  
 >> load test_logicgates.mat  
->> TE_PID(identity, 1);  
-Time bin input time-series? y/n: n  
-Enter output file name: identity_results.csv  
+>> TE_PID('identity_output.csv', identity, 1);   
 ...  
->> type identity_results.csv  
+>> type identity_output.csv  
 
 Target, Source1, Source2, Synergy, Redundancy, Unique1, Unique2  
 1, 2, 3, 1, 1, 0, -1  
 3, 1, 2, 0.235339, 0.0689627, 0.000788227, 0.000788227  
 2, 3, 1, 0.311278, 0, 0, 0.188722  
->> TE_PID(xor, 1);  
-Time bin input time-series? y/n: n  
-Enter output file name: xor_results.csv  
+>> TE_PID('xor_output.csv', xor, 1);  
 ...  
->> type xor_results.csv  
+>> type xor_output.csv  
 
 Target, Source1, Source2, Synergy, Redundancy, Unique1, Unique2  
 1, 2, 3, 1, 0, 0, 0  
 3, 1, 2, 0.128529, 0.062128, 0.000175672, 0.0314032  
 2, 3, 1, 0.106115, 0.0865255, 0.000244657, -0.0242218  
->> TE_PID(and, 1);  
-Time bin input time-series? y/n: n  
-Enter output file name: and_results.csv  
+>> TE_PID('and_output.csv', and, 1);  
 ...  
->> type and_results.csv  
+>> type and_output.csv  
 
 Target, Source1, Source2, Synergy, Redundancy, Unique1, Unique2  
 1, 2, 3, 0.543901, 0.311278, 0.0724104, 0.0724104  
@@ -73,26 +67,22 @@ Therefore, the normalized transfer entropies are
 
 ### `TE_PID.m`
 
-`TE_PID.m`(*time-series*, *time-delay*, *triplet_list*)  
+`TE_PID.m`(*output_filename*, *time-series*, *time-delay*, *triplet_list*, *time_resolution*)  
 Given input matrices and a scalar time-delay, calculate PID terms for transfer entropy.
 
 For *N* neurons, the number of possible neuron triplets is *N\*(N-1)\*(N-2)/2*. Consequently for large *N*, `TE_PID.m` is computationally intensive if *triplet_list* is not given.
 
 #### Parameters:
 
-*time-series*: MATLAB matrix or 1-dimensional cell. Columns should contain entire time-series of a given neuron.  
+*output_filename*: string or char. Recommend .csv files.  
+*time-series*: matrix or 1-dimensional cell. Columns should contain entire time-series of a given neuron.  
 *time-delay*: positive integer scalar.  
-*triplet_list*: [optional] *nx3* matrix of neuron indices. The first column should represent the target neuron index. If *time-series* is a cell, then *triplet_list* should either be a cell with equal dimensions—each cell element containing a triplet list—or a matrix—in which case PID calculations for all trials are restricted to triplets contained in the single matrix. If not given, PID is calculated for all possible triplets.
-
-#### User inputs:
-
-`Time bin input time-series? y/n: `: string. If you wish to time bin, enter `y`, then enter a time resolution.  
-`Choose a time resolution. Please input a positive integer: `: positive integer scalar.  
-`Enter output file name: `: string. Recommend .csv format.
+*triplet_list*: [optional] *nx3* matrix of neuron indices. The first column should represent the target neuron index. If *time-series* is a cell, then *triplet_list* should either be a cell with equal dimensions—each cell element containing a triplet list—or a matrix—in which case PID calculations for all trials are restricted to triplets contained in the single matrix. If not given, PID is calculated for all possible triplets.  
+*time_resolution*: [optional] positive integer scalar. Time bins at given *time_resolution* by partitioning input time-series. If a 1 occurs within a partition, a 1 is recorded. Otherwise, a 0 is recorded. 
 
 #### Outputs:
 
-*output_file_name*: file. Recommend .csv format. 7 comma-separated columns indicating in increasing order: `target_index`, `source1_index`, `source2_index`, `synergy`, `redundancy`, `unique1`, `unique2`. Each row corresponds to a specific triplet. PID terms are given in units of bits.
+*output_file*: file. Recommend .csv format. 7 comma-separated columns indicating in increasing order: `target_index`, `source1_index`, `source2_index`, `synergy`, `redundancy`, `unique1`, `unique2`. Each row corresponds to a specific triplet. PID terms are given in units of bits.
 
 ### Call structure
 
