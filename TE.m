@@ -42,7 +42,7 @@ function [transfer_entropy, normed_TE] = TE(target, source, delay)
         target_entropy = target_entropy - prob * log(prob) / log(2);
     end
     if target_entropy == 0
-        disp('Target time-series has zero entropy. Using unnormalized transfer entropy.')
+         disp('Target time-series has zero entropy. Using unnormalized transfer entropy.')
         normed_TE = transfer_entropy;
     else
         normed_TE = transfer_entropy / target_entropy;

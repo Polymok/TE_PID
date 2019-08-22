@@ -18,6 +18,10 @@
 % containing a nx3 matrix. If this optional argument is not given, this
 % function will calculate PID for all possible triplets.
 %
+% Optionally, you may enter a positive integer time-resolution at which to
+% time bin input data. Note that if you time bin, the time-delay used to
+% calculate transfer entropy will apply to the time binned time-series.
+%
 % This function writes to output file a matrix of unique, synergistic, and
 % redundant partial information terms of transfer entropy between all
 % possible neuron triads. The redundant partial information is taken to be
@@ -47,23 +51,6 @@ function TE_PID(output_filename, input_data, delay, triplet_list, time_resolutio
                 input_data = input_data';
             end
         end
-        % Check if optional triplet list is given.
-        if nargin==3 || isempty(triplet_list)
-            % Generate list of all possible triplets.
-            number_of_neurons_vector = 1:size(input_data,2);
-            target_1 = nchoosek(number_of_neurons_vector,3);
-            target_2 = circshift(target_1,1,2);
-            target_3 = circshift(target_1,-1,2);
-            triplet_list = [target_1; target_2; target_3];
-        else
-            if ~ismatrix(triplet_list)
-                error('List of neuron triplets must be a matrix.')
-            elseif size(triplet_list,2) ~= 3
-                error('List of neuron triplets must have 3 columns.')
-            elseif any(unique(triplet_list) > size(input_data,2))
-                error('Neuron indices in given triplet list must not be greater than total number of neurons in input dataset.')
-            end
-        end
         % Check if optional time resolution is given.
         if nargin==5
             if ~isscalar(time_resolution)
@@ -76,6 +63,30 @@ function TE_PID(output_filename, input_data, delay, triplet_list, time_resolutio
         end
         % Write output to separate file.
         output_file = fopen(output_filename, 'a');
+        % Check if optional triplet list is given.
+        if nargin==3 || isempty(triplet_list)
+            % Generate list of all possible triplets.
+            length_vector = 1:size(input_data,2);
+            for i = length_vector
+                if size(unique(input_data(:,i)),1) == 1
+                    fprintf(output_file, 'Neuron %1u has zero entropy. Discarding all triplets containing neuron %1u.\n', i, i);
+                    length_vector(i) = 0;
+                end
+            end
+            length_vector(length_vector==0) = [];
+            target_1 = nchoosek(length_vector,3);
+            target_2 = circshift(target_1,1,2);
+            target_3 = circshift(target_1,-1,2);
+            triplet_list = [target_1; target_2; target_3];
+        else
+            if ~ismatrix(triplet_list)
+                error('List of neuron triplets must be a matrix.')
+            elseif size(triplet_list,2) ~= 3
+                error('List of neuron triplets must have 3 columns.')
+            elseif any(unique(triplet_list) > size(input_data,2))
+                error('Neuron indices in given triplet list must not be greater than total number of neurons in input dataset.')
+            end
+        end
         fprintf(output_file, 'Target, Source1, Source2, Synergy, Redundancy, Unique1, Unique2\n');
         % Import all neuron triplets from triplet_list.
         for i = 1:(size(triplet_list,1))

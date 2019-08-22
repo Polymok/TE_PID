@@ -74,11 +74,15 @@ For *N* neurons, the number of possible neuron triplets is *N\*(N-1)\*(N-2)/2*. 
 
 #### Parameters:
 
-*output_filename*: string or char. Recommend .csv files.  
-*time-series*: matrix or 1-dimensional cell. Columns should contain entire time-series of a given neuron.  
-*time-delay*: positive integer scalar.  
-*triplet_list*: [optional] *nx3* matrix of neuron indices. The first column should represent the target neuron index. If *time-series* is a cell, then *triplet_list* should either be a cell with equal dimensions—each cell element containing a triplet list—or a matrix—in which case PID calculations for all trials are restricted to triplets contained in the single matrix. If not given, PID is calculated for all possible triplets.  
-*time_resolution*: [optional] positive integer scalar. Time bins at given *time_resolution* by partitioning input time-series. If a 1 occurs within a partition, a 1 is recorded. Otherwise, a 0 is recorded.
+*output_filename*: string or char. Recommend .csv files.
+
+*time-series*: matrix or 1-dimensional cell. Columns should contain entire time-series of a given neuron.
+
+*time-delay*: positive integer scalar.
+
+*triplet_list*: [optional] *nx3* matrix of neuron indices. The first column should represent the target neuron index. If *time-series* is a cell, then *triplet_list* should either be a cell with equal dimensions—each cell element containing a triplet list—or a matrix—in which case PID calculations for all trials are restricted to triplets contained in the single matrix. If not given, PID is calculated for all possible triplets. Triplets containing neurons with zero entropy are discarded.
+
+*time_resolution*: [optional] positive integer scalar. Time bins at given *time_resolution* by partitioning input time-series. If a 1 occurs within a partition, a 1 is recorded. Otherwise, a 0 is recorded. Note that if you time bin, the *time-delay* used to calculate transfer entropy applies to the *time-series* after it has been time binned.
 
 #### Outputs:
 
