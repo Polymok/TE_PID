@@ -21,7 +21,7 @@ function [output_timeseries] = timebin(input_timeseries, resolution)
         error('Input time-delay is not a positive integer.')
     end
     % Check if input time-series is a matrix.
-    if ~isa(input_timeseries, 'double') && ~isa(input_timeseries, 'single') && ~isa(input_timeseries, 'logical')
+    if ~ismatrix(input_timeseries)
         error('Input time-series must be a matrix.')
     end
     % Check if time-series are binary.

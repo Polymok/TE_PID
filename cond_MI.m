@@ -39,12 +39,12 @@ function [condMI] = cond_MI(X, Y, Z)
                 jointprob = sum(sum([X Y Z]==[i' j' k'],2)==(size(X,2)+size(Y,2)+size(Z,2)));
                 % Discard cases with probability zero.
                 if jointprob == 0
-%                     disp(['Pr(X,Y,Z=', num2str(i'), ',', num2str(j'), ',', num2str(k'), ') is zero. Case discarded.'])
+                     disp(['Pr(X,Y,Z=', num2str(i'), ',', num2str(j'), ',', num2str(k'), ') is zero. Case discarded.'])
                 else
                     probXZ = sum(sum([X Z]==[i' k'],2)==(size(X,2)+size(Z,2)));
                     probYZ = sum(sum([Y Z]==[j' k'],2)==(size(Y,2)+size(Z,2)));
                     if (probXZ == 0) || (probYZ == 0)
-%                         disp(['Pr(X,Z=', num2str(i'), ',', num2str(k'), ') or Pr(Y,Z=', num2str(j'), ',', num2str(k'), ') is zero. Case discarded.'])
+                         disp(['Pr(X,Z=', num2str(i'), ',', num2str(k'), ') or Pr(Y,Z=', num2str(j'), ',', num2str(k'), ') is zero. Case discarded.'])
                     else
                         probZ = sum(Z==k');
                         condMI = condMI + jointprob/size(X,1) * log(jointprob * probZ / probXZ / probYZ) / log(2);

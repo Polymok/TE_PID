@@ -49,7 +49,7 @@ function [spec_info] = I_spec(target, target_future_value, delay, opt_source)
             jointprob = sum(sum([opt_source target_past target_future]==[j i target_future_value],2)==3);
             % Discard cases with probability zero.
             if jointprob == 0
-%                 disp(['Pr(source,target_future,target_past=', num2str(j), ',', num2str(target_future_value), ',', num2str(i), ') is zero. Case discarded.'])
+                 disp(['Pr(source,target_future,target_past=', num2str(j), ',', num2str(target_future_value), ',', num2str(i), ') is zero. Case discarded.'])
             else
                 futureprob = sum(target_future==target_future_value);
                 if futureprob == 0
