@@ -11,29 +11,29 @@
 
 function [spec_info] = I_spec(target, target_future_value, delay, opt_source)
     % Check if specific value and time-delay are scalars.
-    if ~isscalar(target_future_value)
-        error('Input specific value is not a scalar.')
-    elseif ~isscalar(delay)
-        error('Input time-delay is not a scalar.')
-    elseif (round(delay)~=delay) || (delay<1)
-        error('Input time-delay is not a positive integer.')
-    end 
+%     if ~isscalar(target_future_value)
+%         error('Input specific value is not a scalar.')
+%     elseif ~isscalar(delay)
+%         error('Input time-delay is not a scalar.')
+%     elseif (round(delay)~=delay) || (delay<1)
+%         error('Input time-delay is not a positive integer.')
+%     end 
     % Check if optional argument is given.
     if nargin == 4
         % Check if time-series inputs are of acceptable type and length.
-        if (~isvector(target)) || (~isvector(opt_source))
-            error('Input time-series are not vectors.')
-        elseif (length(target)~=length(opt_source))
-            error('Input time-series are not of the same length.')
-        end
+%         if (~isvector(target)) || (~isvector(opt_source))
+%             error('Input time-series are not vectors.')
+%         elseif (length(target)~=length(opt_source))
+%             error('Input time-series are not of the same length.')
+%         end
     elseif nargin == 3
         opt_source = zeros(length(target),1);
     else
         error('Number of arguments must be 3 or 4.')
     end
     % Ensure time-series are column vectors.
-    target = target(:);
-    opt_source = opt_source(:);
+%     target = target(:);
+%     opt_source = opt_source(:);
     % Create past and future time-series for target using given time-delay
     % by removing elements at start or end of time-series.
     target_future = target;
@@ -49,7 +49,7 @@ function [spec_info] = I_spec(target, target_future_value, delay, opt_source)
             jointprob = sum(sum([opt_source target_past target_future]==[j i target_future_value],2)==3);
             % Discard cases with probability zero.
             if jointprob == 0
-                 disp(['Pr(source,target_future,target_past=', num2str(j), ',', num2str(target_future_value), ',', num2str(i), ') is zero. Case discarded.'])
+%                  disp(['Pr(source,target_future,target_past=', num2str(j), ',', num2str(target_future_value), ',', num2str(i), ') is zero. Case discarded.'])
             else
                 futureprob = sum(target_future==target_future_value);
                 if futureprob == 0

@@ -13,19 +13,19 @@
 
 function [min_info] = I_min_TE(target, source1, source2, delay)
     % Check if inputs are of acceptable type and length.
-    if (~isvector(target)) || (~isvector(source1)) || (~isvector(source2))
-        error('Inputs are not vectors.')
-    elseif (length(target)~=length(source1)) || (length(target)~=length(source2))
-        error('Input vectors are not of equal length.')
-    elseif ~isscalar(delay)
-        error('Input time-delay is not a scalar.')
-    elseif (round(delay)~=delay) || (delay<1)
-        error('Input time-delay is not a positive integer.')
-    end
+%     if (~isvector(target)) || (~isvector(source1)) || (~isvector(source2))
+%         error('Inputs are not vectors.')
+%     elseif (length(target)~=length(source1)) || (length(target)~=length(source2))
+%         error('Input vectors are not of equal length.')
+%     elseif ~isscalar(delay)
+%         error('Input time-delay is not a scalar.')
+%     elseif (round(delay)~=delay) || (delay<1)
+%         error('Input time-delay is not a positive integer.')
+%     end
     % Ensure inputs are column vectors.
-    target = target(:);
-    source1 = source1(:);
-    source2 = source2(:);
+%     target = target(:);
+%     source1 = source1(:);
+%     source2 = source2(:);
     % Create future time-series for target using given time-delay by
     % truncating at start of time-series.
     target_future = target;
