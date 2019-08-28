@@ -45,7 +45,7 @@ Target, Source1, Source2, Synergy, Redundancy, Unique1, Unique2
 2, 3, 1, 0.0612781, 0.0487949, -2.77556e-17, 0.155639  
 ```
 
-In all three test variables, the first column contains the target time-series of interest. Therefore, we check the first row of the output matrix where *target_index = 1* to verify that our code runs as expected. Note that since transfer entropy splits the target time-series into a future time-series and a past time-series, test cases have their first column shifted by one.
+In all three test variables, the first column contains the target time-series of interest. Therefore, we check the first row of the output matrix where *target_index = 1* to verify that our code returns values as expected. Note that since transfer entropy splits the target time-series into a future time-series and a past time-series, test cases have their first column shifted by one.
 
 As expected, all transfer entropy information is found in *unique1* for the `identity` test case, *synergy* for the `xor` relation.
 
