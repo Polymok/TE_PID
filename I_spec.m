@@ -7,7 +7,7 @@
 %
 % Output is a scalar in units of bits.
 %
-% This function can only take discrete, scalar-valued time-series.
+% This function can only take discrete, binary time-series.
 
 function [spec_info] = I_spec(target, target_future_value, delay, opt_source)
     % Check if specific value and time-delay are scalars.
@@ -43,8 +43,8 @@ function [spec_info] = I_spec(target, target_future_value, delay, opt_source)
     opt_source((length(opt_source)-delay+1):length(opt_source)) = [];
     spec_info = 0; % Initialize output.
     % Sum over all possible values that the two time-series may take.
-    for i = unique(target_past')
-        for j = unique(opt_source')
+    for i = [0,1]
+        for j = [0,1]
             % Record number of instances instead of probability.
             jointprob = sum(sum([opt_source target_past target_future]==[j i target_future_value],2)==3);
             % Discard cases with probability zero.

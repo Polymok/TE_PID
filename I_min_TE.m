@@ -9,7 +9,7 @@
 %
 % Output is a scalar in units of bits.
 %
-% This function can only take discrete, scalar-valued time-series.
+% This function can only take discrete, binary time-series.
 
 function [min_info] = I_min_TE(target, source1, source2, delay)
     % Check if inputs are of acceptable type and length.
@@ -31,7 +31,7 @@ function [min_info] = I_min_TE(target, source1, source2, delay)
     target_future = target;
     target_future(1:delay) = [];
     min_info = 0; % Initialize output.
-    for i = unique(target_future')
+    for i = [0,1]
         subtractor = I_spec(target, i, delay);
         spec_info1 = I_spec(target, i, delay, source1) - subtractor;
         spec_info2 = I_spec(target, i, delay, source2) - subtractor;
