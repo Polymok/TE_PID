@@ -18,7 +18,7 @@ function [recruitment_triplets, recruitment_matrix] = recruitment_tripletfinder(
             ordered_weights = synaptic_matrix(:);
             ordered_weights(ordered_weights==0) = [];
             ordered_weights = sort(ordered_weights);
-            threshold_value = ordered_weights(floor(threshold*size(ordered_weights)));
+            threshold_value = ordered_weights(floor(threshold*size(ordered_weights,1)));
             synaptic_matrix(synaptic_matrix<threshold_value) = 0;
         end
     end
@@ -33,7 +33,8 @@ function [recruitment_triplets, recruitment_matrix] = recruitment_tripletfinder(
     target_3 = circshift(target_1,-1,2);
     all_triplets_list = [target_1; target_2; target_3];
     % Initialize list of targeted neuron triplets of the recruitment network.
-    recruitment_triplets = zeros(symsum(nchoosek(n,2), n, 2, size(length_vector)-1), 3);
+    syms n
+    recruitment_triplets = zeros(double(symsum(nchoosek(n,2), n, 2, size(length_vector,2)-1)), 3);
     % Initialize dummy variable to indicate rows of output matrix.
     row_index = 1;
     for i = 1:(size(all_triplets_list,1))
@@ -42,4 +43,5 @@ function [recruitment_triplets, recruitment_matrix] = recruitment_tripletfinder(
             row_index = row_index+1; % Increment dummy variable by 1.
         end
     end
+    recruitment_triplets(recruitment_triplets(:,1)==0,:) = []; % Remove zeroes.
 end

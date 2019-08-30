@@ -61,7 +61,7 @@ function [functional_triplets, functional_matrix, threshold_matrix] = TE_triplet
             ordered_weights = functional_matrix(:);
             ordered_weights(ordered_weights==0) = [];
             ordered_weights = sort(ordered_weights);
-            threshold_value = ordered_weights(floor(threshold*size(ordered_weights)));
+            threshold_value = ordered_weights(floor(threshold*size(ordered_weights,1)));
             threshold_matrix(threshold_matrix<threshold_value) = 0;
         end
     end
@@ -80,7 +80,8 @@ function [functional_triplets, functional_matrix, threshold_matrix] = TE_triplet
     % TE(j->i)>TE(i->j) and TE(k->i)>TE(i->k) at the given time-delay.
     % Columns indicate in increasing order:
     % target | source1 | source2
-    functional_triplets = zeros(symsum(nchoosek(n,2), n, 2, size(length_vector)-1), 3);
+    syms n
+    functional_triplets = zeros(double(symsum(nchoosek(n,2), n, 2, size(length_vector,2)-1)), 3);
     % Initialize dummy variable to indicate rows of output matrix.
     row_index = 1;
     for i = 1:(size(all_triplets_list,1))
@@ -89,4 +90,5 @@ function [functional_triplets, functional_matrix, threshold_matrix] = TE_triplet
             row_index = row_index+1; % Increment dummy variable by 1.
         end
     end
+    functional_triplets(functional_triplets(:,1)==0,:) = []; % Remove zeroes.
 end
