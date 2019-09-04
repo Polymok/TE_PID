@@ -44,7 +44,7 @@ function [functional_triplets, functional_matrix, threshold_matrix] = TE_triplet
             functional_matrix(neuron_pairs(i,2),neuron_pairs(i,1)) = j_to_i;
         elseif i_to_j==0 && j_to_i==0
         elseif i_to_j==j_to_i
-            disp('Transfer entropy in both directions are equal.')
+%             disp('Transfer entropy in both directions are equal.')
             functional_matrix(neuron_pairs(i,1),neuron_pairs(i,2)) = i_to_j;
             functional_matrix(neuron_pairs(i,2),neuron_pairs(i,1)) = i_to_j;
         end
