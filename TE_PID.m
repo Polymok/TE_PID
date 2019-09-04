@@ -1,11 +1,11 @@
 % Timme et al., "High-Degree Neurons Feed Cortical Computations". PLoS Comput Biol (2016).
 %
-% This function admits as inputs matrices, or cells of matrices. In the
+% This function admits as input matrices, or cells of matrices. In the
 % latter case, the cell must be one-dimensional. Each cell is interpreted
 % as containing time-series of all neurons recorded in a single trial. In
 % both cases, each time-series must be contained in a column of the input
 % matrices, i.e. columns represent neurons and rows represent observations
-% at certain times.
+% at certain times. Each spike train for each neuron must be scalar-valued.
 %
 % A positive integer time-delay is required to compute transfer entropy
 % values.
@@ -30,6 +30,10 @@
 %
 % In each output matrix, the columns indicate in increasing order:
 % target | source1 | source2 | synergy | redundancy | unique1 | unique2
+%
+% Entropy for each neuron is also calculated and recorded using the
+% neuron's spike train with the first term(s) removed according to the
+% time-delay given.
 %
 % PID is calculated for all neuron triplets. If N simultaneously recorded
 % time-series are given, N*(N-1)*(N-2)/2 triplets are returned.
@@ -87,13 +91,26 @@ function TE_PID(output_filename, input_data, delay, triplet_list, time_resolutio
                 error('Neuron indices in given triplet list must not be greater than total number of neurons in input dataset.')
             end
         end
+        fprintf(output_file, 'Target, Entropy\n');
+        for i = 1:size(length_vector,2)
+            entropy = 0;
+            target_future = input_data(:,length_vector(i));
+            target_future(1:delay) = [];
+                for j = [0,1]
+                prob = sum(target_future==j)/size(target_future,1);
+                    if prob ~= 0
+                        entropy = entropy - prob * log(prob) / log(2);
+                    end
+                end
+            fprintf(output_file, '%1u, %.6g\n', length_vector(i), entropy);
+        end
         fprintf(output_file, 'Target, Source1, Source2, Synergy, Redundancy, Unique1, Unique2\n');
         % Import all neuron triplets from triplet_list.
         for i = 1:(size(triplet_list,1))
             redundancy = I_min_TE(input_data(:,triplet_list(i,1)), input_data(:,triplet_list(i,2)), input_data(:,triplet_list(i,3)), delay);
-            [~, TE1] = TE(input_data(:,triplet_list(i,1)), input_data(:,triplet_list(i,2)), delay); % Use transfer entropy normalized by entropy of target.
-            [~, TE2] = TE(input_data(:,triplet_list(i,1)), input_data(:,triplet_list(i,3)), delay);
-            [~, TE12] = TE(input_data(:,triplet_list(i,1)), [input_data(:,triplet_list(i,2)) input_data(:,triplet_list(i,3))], delay);
+            [TE1, ~] = TE(input_data(:,triplet_list(i,1)), input_data(:,triplet_list(i,2)), delay); % Use transfer entropy normalized by entropy of target.
+            [TE2, ~] = TE(input_data(:,triplet_list(i,1)), input_data(:,triplet_list(i,3)), delay);
+            [TE12, ~] = TE(input_data(:,triplet_list(i,1)), [input_data(:,triplet_list(i,2)) input_data(:,triplet_list(i,3))], delay);
             unique1 = TE1 - redundancy;
             unique2 = TE2 - redundancy;
             synergy =  TE12 - redundancy - unique1 - unique2;
