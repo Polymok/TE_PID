@@ -85,7 +85,7 @@ function TE_PID(output_filename, input_data, delay, triplet_list, time_resolutio
             elseif any(unique(triplet_list) > size(input_data,2))
                 error('Neuron indices in given triplet list must not be greater than total number of neurons in input dataset.')
             else
-                length_vector = sort(unique(triplet_list))';
+                length_vector = (unique(triplet_list))';
                 for i = length_vector
                     if size(unique(input_data(:,i)),1) == 1
                         fprintf(output_file, 'Neuron %1u has zero entropy. Discarding all triplets containing neuron %1u.\n', i, i);
