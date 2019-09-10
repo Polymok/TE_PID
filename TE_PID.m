@@ -59,6 +59,7 @@ function TE_PID(output_filename, input_data, delay, triplet_list, time_resolutio
         if nargin==5
             input_data = timebin(input_data, time_resolution);
         end
+        clear time_resolution
         % Write output to separate file.
         output_file = fopen(output_filename, 'a');
         % Check if optional triplet list is given.
@@ -110,16 +111,29 @@ function TE_PID(output_filename, input_data, delay, triplet_list, time_resolutio
             fprintf(output_file, '%1u, %.6g\n', i, entropy);
         end
         fprintf(output_file, 'Target, Source1, Source2, Synergy, Redundancy, Unique1, Unique2\n');
+        % Calculate and store transfer entropies from single source to single target.
+        targeted_pairs = unique([triplet_list(:,1:2); triplet_list(:,1) triplet_list(:,3)], 'rows');
+        single_TEs = zeros(size(targeted_pairs,1),3);
+        row_index = 1;
+        for i = targeted_pairs'
+            single_TEs(row_index,1:2) = i';
+            single_TEs(row_index,3) = TE(input_data(:,i(1)), input_data(:,i(2)), delay);
+            row_index = row_index + 1;
+        end
+        % Remove unnecessary variables from memory.
+        clear length_vector
+        clear targeted_pairs
+        clear row_index
         % Import all neuron triplets from triplet_list.
-        for i = 1:(size(triplet_list,1))
-            redundancy = I_min_TE(input_data(:,triplet_list(i,1)), input_data(:,triplet_list(i,2)), input_data(:,triplet_list(i,3)), delay);
-            TE1 = TE(input_data(:,triplet_list(i,1)), input_data(:,triplet_list(i,2)), delay);
-            TE2 = TE(input_data(:,triplet_list(i,1)), input_data(:,triplet_list(i,3)), delay);
-            TE12 = TE(input_data(:,triplet_list(i,1)), [input_data(:,triplet_list(i,2)) input_data(:,triplet_list(i,3))], delay);
+        for i = triplet_list'
+            redundancy = I_min_TE(input_data(:,i(1)), input_data(:,i(2)), input_data(:,i(3)), delay);
+            TE1 = single_TEs(sum(single_TEs(:,1:2)==[i(1) i(2)],2)==2,3);
+            TE2 = single_TEs(sum(single_TEs(:,1:2)==[i(1) i(3)],2)==2,3);
+            TE12 = TE(input_data(:,i(1)), [input_data(:,i(2)) input_data(:,i(3))], delay);
             unique1 = TE1 - redundancy;
             unique2 = TE2 - redundancy;
             synergy =  TE12 - redundancy - unique1 - unique2;
-            output_data = [triplet_list(i,1); triplet_list(i,2); triplet_list(i,3); synergy; redundancy; unique1; unique2];
+            output_data = [i; synergy; redundancy; unique1; unique2];
             fprintf(output_file, '%1u, %1u, %1u, %.6g, %.6g, %.6g, %.6g\n', output_data);
         end
         fclose(output_file);
