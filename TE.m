@@ -36,15 +36,17 @@ function [transfer_entropy, normed_TE] = TE(target, source, delay)
     source_past((size(source,1)-delay+1):size(source,1),:) = [];
     transfer_entropy = cond_MI(source_past, target_future, target_past);
     % Normalize by entropy of target time-series.
-    target_entropy = 0;
-    for i = unique(target_future, 'row')'
-        prob = sum(target_future==i')/size(target_future,1);
-        target_entropy = target_entropy - prob * log(prob) / log(2);
-    end
-    if target_entropy == 0
-%          disp('Target time-series has zero entropy. Using unnormalized transfer entropy.')
-        normed_TE = transfer_entropy;
-    else
-        normed_TE = transfer_entropy / target_entropy;
+    if nargout==2
+        target_entropy = 0;
+        for i = unique(target_future, 'row')'
+            prob = sum(target_future==i')/size(target_future,1);
+            target_entropy = target_entropy - prob * log(prob) / log(2);
+        end
+        if target_entropy == 0
+%             disp('Target time-series has zero entropy. Using unnormalized transfer entropy.')
+          normed_TE = transfer_entropy;
+        else
+            normed_TE = transfer_entropy / target_entropy;
+        end
     end
 end

@@ -87,8 +87,6 @@ For *N* neurons, the number of possible neuron triplets is *N\*(N-1)\*(N-2)/2*. 
 |----------------------|-----------------------------------|
 | `TE_PID.m`           | `I_min_TE.m` `TE.m` [`timebin.m`] |
 | `I_min_TE.m`         | `I_spec.m`                        |
-| `TE_tripletfinder.m` | `TE_timelag.m`                    |
-| `TE_timelag.m`       | `TE.m`                            |
 | `TE.m`               | `cond_MI.m`                       |
 
 ## Bugs

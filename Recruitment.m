@@ -1,7 +1,7 @@
 % This function finds the recruitment matrix, i.e. the intersection of the
 % functional matrix and the synaptic connectivity matrix.
 
-function [recruitment_triplets, recruitment_matrix] = recruitment_tripletfinder(functional_matrix, synaptic_matrix, threshold)
+function [recruitment_triplets, recruitment_matrix] = Recruitment(functional_matrix, synaptic_matrix, threshold)
     if ~ismatrix(functional_matrix) || ~ismatrix(synaptic_matrix)
         error('Input weight matrices must be matrices.')
     elseif size(functional_matrix)~=size(synaptic_matrix)

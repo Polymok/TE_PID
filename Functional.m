@@ -8,7 +8,7 @@
 % This function is designed to filter neuron triplets for transfer entropy
 % partial information decomposition calculation.
 
-function [functional_triplets, functional_matrix, threshold_matrix] = TE_tripletfinder(input_timeseries, delay, threshold)
+function [functional_triplets, functional_matrix, threshold_matrix] = Functional(input_timeseries, delay, threshold)
     % Check if input formats are acceptable.
     if ~ismatrix(input_timeseries)
         error('Input time-series must be a matrix.')
@@ -36,8 +36,8 @@ function [functional_triplets, functional_matrix, threshold_matrix] = TE_triplet
     length_vector = 1:size(input_timeseries,2);
     neuron_pairs = nchoosek(length_vector,2);
     for i = 1:size(neuron_pairs,1)
-        [i_to_j, ~] = TE(input_timeseries(:,neuron_pairs(i,2)), input_timeseries(:,neuron_pairs(i,1)), delay);
-        [j_to_i, ~] = TE(input_timeseries(:,neuron_pairs(i,1)), input_timeseries(:,neuron_pairs(i,2)), delay);
+        i_to_j = TE(input_timeseries(:,neuron_pairs(i,2)), input_timeseries(:,neuron_pairs(i,1)), delay);
+        j_to_i = TE(input_timeseries(:,neuron_pairs(i,1)), input_timeseries(:,neuron_pairs(i,2)), delay);
         if i_to_j > j_to_i
             functional_matrix(neuron_pairs(i,1),neuron_pairs(i,2)) = i_to_j;
         elseif i_to_j < j_to_i

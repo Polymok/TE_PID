@@ -47,19 +47,17 @@ function [spec_info] = I_spec(target, target_future_value, delay, opt_source)
         for j = [0,1]
             % Record number of instances instead of probability.
             jointprob = sum(sum([opt_source target_past target_future]==[j i target_future_value],2)==3);
+            futureprob = sum(target_future==target_future_value);
+            pastprob = sum(sum([opt_source target_past]==[j i],2)==2);
             % Discard cases with probability zero.
             if jointprob == 0
-%                  disp(['Pr(source,target_future,target_past=', num2str(j), ',', num2str(target_future_value), ',', num2str(i), ') is zero. Case discarded.'])
+%                 disp(['Pr(source,target_future,target_past=', num2str(j), ',', num2str(target_future_value), ',', num2str(i), ') is zero. Case discarded.'])
+            elseif futureprob == 0
+%                 disp(['Pr(target_future=', num2str(target_future_value), ') is zero. Case discarded.'])
+            elseif pastprob == 0
+%                 disp(['Pr(target_past=', num2str(i), ') is zero. Case discarded.'])
             else
-                futureprob = sum(target_future==target_future_value);
-                if futureprob == 0
-                else
-                    pastprob = sum(sum([opt_source target_past]==[j i],2)==2);
-                    if pastprob == 0
-                    else
-                    spec_info = spec_info + jointprob / futureprob * log(jointprob / pastprob / futureprob * length(target_future)) / log(2);
-                    end
-                end
+                spec_info = spec_info + jointprob / futureprob * log(jointprob / pastprob / futureprob * length(target_future)) / log(2);
             end
         end
     end
