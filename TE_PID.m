@@ -101,7 +101,7 @@ function TE_PID(output_filename, input_data, delay, triplet_list, time_resolutio
             entropy = 0;
             target_future = input_data(:,i);
             target_future(1:delay) = [];
-                for j = [0,1]
+                for j = [0,1] % Binary time-series only.
                     prob = sum(target_future==j)/size(target_future,1);
                     if prob ~= 0
                         entropy = entropy - prob * log(prob) / log(2);
