@@ -57,13 +57,7 @@ function TE_PID(output_filename, input_data, delay, triplet_list, time_resolutio
         end
         % Check if optional time resolution is given.
         if nargin==5
-            if ~isscalar(time_resolution)
-                error('Time resolution must be a scalar.')
-            elseif (round(time_resolution)~=time_resolution) || (time_resolution<1)
-                error('Time resolution must a positive integer.')
-            else
-                input_data = timebin(input_data, time_resolution);
-            end
+            input_data = timebin(input_data, time_resolution);
         end
         % Write output to separate file.
         output_file = fopen(output_filename, 'a');
@@ -89,8 +83,18 @@ function TE_PID(output_filename, input_data, delay, triplet_list, time_resolutio
                 error('List of neuron triplets must have 3 columns.')
             elseif any(unique(triplet_list) > size(input_data,2))
                 error('Neuron indices in given triplet list must not be greater than total number of neurons in input dataset.')
+            else
+                indices_list = sort(unique(triplet_list));
+                length_vector = indices_list(:);
+                for i = length_vector
+                    if size(unique(input_data(:,length_vector(i))),1) == 1
+                        fprintf(output_file, 'Neuron %1u has zero entropy. Discarding all triplets containing neuron %1u.\n', length_vector(i), length_vector(i));
+                        triplet_list(sum(triplet_list==length_vector(i),2)>0,:) = [];
+                    end
+                end
             end
         end
+        % Calculate and record entropy of target neuron separately.
         fprintf(output_file, 'Target, Entropy\n');
         for i = 1:size(length_vector,2)
             entropy = 0;
@@ -108,9 +112,9 @@ function TE_PID(output_filename, input_data, delay, triplet_list, time_resolutio
         % Import all neuron triplets from triplet_list.
         for i = 1:(size(triplet_list,1))
             redundancy = I_min_TE(input_data(:,triplet_list(i,1)), input_data(:,triplet_list(i,2)), input_data(:,triplet_list(i,3)), delay);
-            [TE1, ~] = TE(input_data(:,triplet_list(i,1)), input_data(:,triplet_list(i,2)), delay); % Use transfer entropy normalized by entropy of target.
-            [TE2, ~] = TE(input_data(:,triplet_list(i,1)), input_data(:,triplet_list(i,3)), delay);
-            [TE12, ~] = TE(input_data(:,triplet_list(i,1)), [input_data(:,triplet_list(i,2)) input_data(:,triplet_list(i,3))], delay);
+            TE1 = TE(input_data(:,triplet_list(i,1)), input_data(:,triplet_list(i,2)), delay);
+            TE2 = TE(input_data(:,triplet_list(i,1)), input_data(:,triplet_list(i,3)), delay);
+            TE12 = TE(input_data(:,triplet_list(i,1)), [input_data(:,triplet_list(i,2)) input_data(:,triplet_list(i,3))], delay);
             unique1 = TE1 - redundancy;
             unique2 = TE2 - redundancy;
             synergy =  TE12 - redundancy - unique1 - unique2;
