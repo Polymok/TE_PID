@@ -54,12 +54,13 @@ function TE_PID(output_filename, input_data, delay, triplet_list, time_resolutio
             if str == 'y'
                 input_data = input_data';
             end
+            clear str
         end
         % Check if optional time resolution is given.
         if nargin==5
             input_data = timebin(input_data, time_resolution);
+            clear time_resolution
         end
-        clear time_resolution
         % Write output to separate file.
         output_file = fopen(output_filename, 'a');
         % Check if optional triplet list is given.
@@ -77,6 +78,9 @@ function TE_PID(output_filename, input_data, delay, triplet_list, time_resolutio
             target_2 = circshift(target_1,1,2);
             target_3 = circshift(target_1,-1,2);
             triplet_list = [target_1; target_2; target_3];
+            clear target_1
+            clear target_2
+            clear target_3
         else
             if ~ismatrix(triplet_list)
                 error('List of neuron triplets must be a matrix.')
@@ -110,6 +114,8 @@ function TE_PID(output_filename, input_data, delay, triplet_list, time_resolutio
                 end
             fprintf(output_file, '%1u, %.6g\n', i, entropy);
         end
+        clear prob
+        clear entropy
         fprintf(output_file, 'Target, Source1, Source2, Synergy, Redundancy, Unique1, Unique2\n');
         % Calculate and store transfer entropies from single source to single target.
         targeted_pairs = unique([triplet_list(:,1:2); triplet_list(:,1) triplet_list(:,3)], 'rows');
@@ -120,7 +126,6 @@ function TE_PID(output_filename, input_data, delay, triplet_list, time_resolutio
             single_TEs(row_index,3) = TE(input_data(:,i(1)), input_data(:,i(2)), delay);
             row_index = row_index + 1;
         end
-        % Remove unnecessary variables from memory.
         clear length_vector
         clear targeted_pairs
         clear row_index

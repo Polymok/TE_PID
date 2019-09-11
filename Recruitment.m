@@ -1,7 +1,7 @@
 % This function finds the recruitment matrix, i.e. the intersection of the
 % functional matrix and the synaptic connectivity matrix.
 
-function [recruitment_triplets, recruitment_matrix] = Recruitment(functional_matrix, synaptic_matrix, threshold)
+function [recruitment_triplets, recruitment_matrix] = recruitment(functional_matrix, synaptic_matrix, threshold)
     if ~ismatrix(functional_matrix) || ~ismatrix(synaptic_matrix)
         error('Input weight matrices must be matrices.')
     elseif size(functional_matrix)~=size(synaptic_matrix)
@@ -32,14 +32,18 @@ function [recruitment_triplets, recruitment_matrix] = Recruitment(functional_mat
     target_2 = circshift(target_1,1,2);
     target_3 = circshift(target_1,-1,2);
     all_triplets_list = [target_1; target_2; target_3];
+    clear target_1
+    clear target_2
+    clear target_3
     % Initialize list of targeted neuron triplets of the recruitment network.
     syms n
     recruitment_triplets = zeros(double(symsum(nchoosek(n,2), n, 2, size(length_vector,2)-1)), 3);
+    clear length_vector
     % Initialize dummy variable to indicate rows of output matrix.
     row_index = 1;
-    for i = 1:(size(all_triplets_list,1))
-        if (recruitment_matrix(all_triplets_list(i,1), all_triplets_list(i,2))>0) && (recruitment_matrix(all_triplets_list(i,1), all_triplets_list(i,3))>0)
-            recruitment_triplets(row_index,:) = all_triplets_list(i,:); % Write to row of output matrix indicated by row_index.
+    for i = all_triplets_list'
+        if (recruitment_matrix(i(1), i(2))>0) && (recruitment_matrix(i(1), i(3))>0)
+            recruitment_triplets(row_index,:) = i'; % Write to row of output matrix indicated by row_index.
             row_index = row_index+1; % Increment dummy variable by 1.
         end
     end
