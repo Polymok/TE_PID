@@ -5,6 +5,9 @@
 % satisfying TE(source1->target)>TE(target->source1) and
 % TE(source2->target)>TE(target->source2) at the given time-delay.
 %
+% Optionally input a threshold percentage. E.g. if input threshold is 80%,
+% result will discard bottom 80% of non-zero functional connections.
+%
 % This function is designed to filter neuron triplets for transfer entropy
 % partial information decomposition calculation.
 
@@ -62,9 +65,8 @@ function [functional_triplets, functional_matrix, threshold_matrix] = functional
         elseif (threshold>1) || (threshold<0)
             error('Threshold must be between 0 and 1.')
         else
-            ordered_weights = functional_matrix(:);
+            ordered_weights = sort(functional_matrix(:));
             ordered_weights(ordered_weights==0) = [];
-            ordered_weights = sort(ordered_weights);
             threshold_value = ordered_weights(floor(threshold*size(ordered_weights,1)));
             threshold_matrix(threshold_matrix<threshold_value) = 0;
         end

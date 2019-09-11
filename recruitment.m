@@ -15,9 +15,8 @@ function [recruitment_triplets, recruitment_matrix] = recruitment(functional_mat
         elseif (threshold>1) || (threshold<0)
             error('Threshold must be between 0 and 1.')
         else
-            ordered_weights = synaptic_matrix(:);
+            ordered_weights = sort(synaptic_matrix(:));
             ordered_weights(ordered_weights==0) = [];
-            ordered_weights = sort(ordered_weights);
             threshold_value = ordered_weights(floor(threshold*size(ordered_weights,1)));
             synaptic_matrix(synaptic_matrix<threshold_value) = 0;
         end
