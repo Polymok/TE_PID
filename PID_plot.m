@@ -10,11 +10,11 @@ function fig_handle =  PID_plot(varargin)
         histogram(varargin{i}(:,4), 'Normalization', 'pdf');
         title('Synergy');
     
-        subplot(3,3,(i-1)*3+2);
+        subplot(nargin,3,(i-1)*3+2);
         histogram(varargin{i}(:,5), 'Normalization', 'pdf');
         title('Redundancy');
 
-        subplot(3,3,(i-1)*3+3);
+        subplot(nargin,3,(i-1)*3+3);
         histogram(varargin{i}(:,6:7), 'Normalization', 'pdf');
         title('Unique');
     end
