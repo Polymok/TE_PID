@@ -40,7 +40,7 @@ function [transfer_entropy, normed_TE] = TE(target, source, delay)
         target_entropy = 0;
         for i = unique(target_future, 'row')'
             prob = sum(target_future==i')/size(target_future,1);
-            target_entropy = target_entropy - prob * log(prob) / log(2);
+            target_entropy = target_entropy - prob * log2(prob);
         end
         if target_entropy == 0
 %             disp('Target time-series has zero entropy. Using unnormalized transfer entropy.')

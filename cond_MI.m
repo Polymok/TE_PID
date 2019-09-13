@@ -1,6 +1,7 @@
 % Given three time-series X, Y, Z, this function returns the conditional
 % mutual information between X and Y conditioned on Z, denoted MI(X;Y|Z).
-% Time-series should be given as column vectors.
+% Time-series should be given as column vectors. Output is given in units
+% of bits.
 %
 % This function can only take discrete time-series.
 %
@@ -48,7 +49,7 @@ function [condMI] = cond_MI(X, Y, Z)
 %                     disp(['Pr(Y,Z=', num2str(j'), ',', num2str(k'), ') is zero. Case discarded.'])
                 else
                     probZ = sum(Z==k');
-                    condMI = condMI + jointprob/size(X,1) * log(jointprob * probZ / probXZ / probYZ) / log(2);   
+                    condMI = condMI + jointprob/size(X,1) * log2(jointprob * probZ / probXZ / probYZ);   
                 end
             end
         end

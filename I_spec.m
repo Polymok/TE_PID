@@ -57,7 +57,7 @@ function [spec_info] = I_spec(target, target_future_value, delay, opt_source)
             elseif pastprob == 0
 %                 disp(['Pr(target_past=', num2str(i), ') is zero. Case discarded.'])
             else
-                spec_info = spec_info + jointprob / futureprob * log(jointprob / pastprob / futureprob * length(target_future)) / log(2);
+                spec_info = spec_info + jointprob / futureprob * log2(jointprob / pastprob / futureprob * length(target_future));
             end
         end
     end
