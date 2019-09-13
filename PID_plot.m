@@ -4,9 +4,7 @@
 % Inputs must be nx7 matrices, e.g. outputs of TE_PID.m.
 
 function [fig_handle, synergy, redundancy, unique] =  PID_plot(all_PID, functional_PID, recruitment_PID)
-    if nargin ~= 3
-        error('3 inputs required.')
-    elseif ~ismatrix(all_PID) || ~ismatrix(functional_PID) || ~ismatrix(recruitment_PID)
+    if ~ismatrix(all_PID) || ~ismatrix(functional_PID) || ~ismatrix(recruitment_PID)
         error('Inputs must be matrices.')
     elseif size(all_PID,2)~=7 || size(functional_PID,2)~=7 || size(recruitment_PID,2)~=7
         error('Input matrices must have 7 columns.')

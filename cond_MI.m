@@ -35,7 +35,7 @@ function [condMI] = cond_MI(X, Y, Z)
     for i = unique(X,'row')'
         for j= unique(Y,'row')'
             for k = unique(Z,'row')'
-                % Record number of instances instead of probability.
+                % Count number of instances instead of probability.
                 jointprob = sum(sum([X Y Z]==[i' j' k'],2)==(size(X,2)+size(Y,2)+size(Z,2)));
                 probXZ = sum(sum([X Z]==[i' k'],2)==(size(X,2)+size(Z,2)));
                 probYZ = sum(sum([Y Z]==[j' k'],2)==(size(Y,2)+size(Z,2)));

@@ -45,7 +45,7 @@ function [spec_info] = I_spec(target, target_future_value, delay, opt_source)
     % Sum over all possible values that the two time-series may take.
     for i = [0,1] % Binary time-series only.
         for j = [0,1] % Binary time-series only.
-            % Record number of instances instead of probability.
+            % Count number of instances instead of probability.
             jointprob = sum(sum([opt_source target_past target_future]==[j i target_future_value],2)==3);
             futureprob = sum(target_future==target_future_value);
             pastprob = sum(sum([opt_source target_past]==[j i],2)==2);
