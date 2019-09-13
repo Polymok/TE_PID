@@ -4,7 +4,7 @@
 function [recruitment_triplets, recruitment_matrix] = recruitment(functional_matrix, synaptic_matrix, threshold)
     if ~ismatrix(functional_matrix) || ~ismatrix(synaptic_matrix)
         error('Input weight matrices must be matrices.')
-    elseif size(functional_matrix)~=size(synaptic_matrix)
+    elseif (size(functional_matrix,1)~=size(synaptic_matrix,1)) || (size(functional_matrix,2)~=size(synaptic_matrix,2))
         error('Input weight matrices must have the same dimensions.')
     elseif size(functional_matrix,1)~=size(functional_matrix,2)
         error('Input weight matrices must be square.')

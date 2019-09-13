@@ -21,33 +21,27 @@ Call `TE_PID.m` with test case matrix variables `{identity, xor, and}` stored in
 ```
 >> cd ~/TE_PID  
 >> load test_logicgates.mat  
->> TE_PID('identity_output.csv', identity, 1);   
+>> TE_PID('identity_output.csv', identity, 1, [1 2 3]);   
 ...  
 >> type identity_output.csv  
 
 ...  
 Target, Source1, Source2, Synergy, Redundancy, Unique1, Unique2  
 1, 2, 3, 0, 0, 1, 0  
-3, 1, 2, 0.233459, 0.0689627, 0, 0  
-2, 3, 1, 0.311278, 0, 0, 0.188722  
->> TE_PID('xor_output.csv', xor, 1);  
+>> TE_PID('xor_output.csv', xor, 1, [1 2 3]);  
 ...  
 >> type xor_output.csv
 
 ...  
 Target, Source1, Source2, Synergy, Redundancy, Unique1, Unique2  
 1, 2, 3, 1, 0, 0, 0  
-3, 1, 2, 0.128342, 0.062128, -6.93889e-18, 0.0311395  
-2, 3, 1, 0.0816618, 0.062128, 0.0243975, 6.93889e-17  
->> TE_PID('and_output.csv', and, 1);  
+>> TE_PID('and_output.csv', and, 1, [1 2 3]);  
 ...  
 >> type and_output.csv  
 
 ...  
 Target, Source1, Source2, Synergy, Redundancy, Unique1, Unique2  
 1, 2, 3, 0.5, 0.311278, 5.55112e-17, 5.55112e-17  
-3, 1, 2, 0.0306391, 0.0243975, 0.233459, 4.85723e-17  
-2, 3, 1, 0.0612781, 0.0487949, -2.77556e-17, 0.155639  
 ```
 
 In all three test variables, the first column contains the target time-series of interest. Therefore, we check the first row of the output matrix where *target_index = 1* to verify that our code returns values as expected. Note that since transfer entropy splits the target time-series into a future time-series and a past time-series, test cases have their first column shifted by one.

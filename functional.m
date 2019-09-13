@@ -11,7 +11,7 @@
 % This function is designed to filter neuron triplets for transfer entropy
 % partial information decomposition calculation.
 
-function [functional_triplets, functional_matrix, threshold_matrix] = functional(input_timeseries, delay, threshold)
+function [functional_triplets, threshold_matrix] = functional(input_timeseries, delay, threshold)
     % Check if input formats are acceptable.
     if ~ismatrix(input_timeseries)
         error('Input time-series must be a matrix.')
@@ -35,41 +35,42 @@ function [functional_triplets, functional_matrix, threshold_matrix] = functional
     % directional matrix. Conversely, if greater transfer entropy obtains
     % when j lags behind i, we record TE(j->i in element (j,i) of the
     % directional matrix.
-    functional_matrix = zeros(size(input_timeseries,2), size(input_timeseries,2));
+    threshold_matrix = zeros(size(input_timeseries,2), size(input_timeseries,2));
     % Initialize list of all undirected neuron pairs.
     length_vector = 1:size(input_timeseries,2);
     neuron_pairs = nchoosek(length_vector,2);
-    for i = neuron_pairs'
-        i_to_j = TE(input_timeseries(:,i(2)), input_timeseries(:,i(1)), delay);
-        j_to_i = TE(input_timeseries(:,i(1)), input_timeseries(:,i(2)), delay);
+    for pair = neuron_pairs'
+        i_to_j = TE(input_timeseries(:,pair(2)), input_timeseries(:,pair(1)), delay);
+        j_to_i = TE(input_timeseries(:,pair(1)), input_timeseries(:,pair(2)), delay);
         if i_to_j > j_to_i
-            functional_matrix(i(1),i(2)) = i_to_j;
+            threshold_matrix(pair(1),pair(2)) = i_to_j;
         elseif i_to_j < j_to_i
-            functional_matrix(i(2),i(1)) = j_to_i;
+            threshold_matrix(pair(2),pair(1)) = j_to_i;
         elseif i_to_j==0 && j_to_i==0
         elseif i_to_j==j_to_i
 %             disp('Transfer entropy in both directions are equal.')
-            functional_matrix(i(1),i(2)) = i_to_j;
-            functional_matrix(i(2),i(1)) = j_to_i;
+            threshold_matrix(pair(1),pair(2)) = i_to_j;
+            threshold_matrix(pair(2),pair(1)) = j_to_i;
         end
     end
     clear neuron_pairs
     clear i
     clear i_to_j
     clear j_to_i
-    % Initialze weight matrix thresholded at given threshold.
-    threshold_matrix = functional_matrix;
+    % Threshold.
     if nargin == 3
         if ~isscalar(threshold)
             error('Threshold must be a scalar.')
         elseif (threshold>1) || (threshold<0)
             error('Threshold must be between 0 and 1.')
         else
-            ordered_weights = sort(functional_matrix(:));
+            ordered_weights = sort(threshold_matrix(:));
             ordered_weights(ordered_weights==0) = [];
             threshold_value = ordered_weights(floor(threshold*size(ordered_weights,1)));
             threshold_matrix(threshold_matrix<threshold_value) = 0;
         end
+        clear threshold_value
+        clear ordered_weights
     end
     % Initialize nx3 matrix of all targeted non-zero neuron triplets.
     for i = length_vector
