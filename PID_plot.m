@@ -3,52 +3,19 @@
 %
 % Inputs must be nx7 matrices, e.g. outputs of TE_PID.m.
 
-function [fig_handle, synergy, redundancy, unique] =  PID_plot(all_PID, functional_PID, recruitment_PID)
-    if ~ismatrix(all_PID) || ~ismatrix(functional_PID) || ~ismatrix(recruitment_PID)
-        error('Inputs must be matrices.')
-    elseif size(all_PID,2)~=7 || size(functional_PID,2)~=7 || size(recruitment_PID,2)~=7
-        error('Input matrices must have 7 columns.')
-    end
-    
+function fig_handle =  PID_plot(varargin)
     fig_handle = figure;
+    for i = 1:nargin
+        subplot(nargin,3,(i-1)*3+1);
+        histogram(varargin{i}(:,4), 'Normalization', 'pdf');
+        title('Synergy');
     
-    subplot(3,3,1);
-    synergy_all = histogram(all_PID(:,4), 'Normalization', 'pdf');
-    title('Synergy: all triplets');
-    
-    subplot(3,3,4);
-    synergy_func = histogram(functional_PID(:,4), 'Normalization', 'pdf');
-    title('Synergy: functional network');
-    
-    subplot(3,3,7);
-    synergy_recr = histogram(recruitment_PID(:,4), 'Normalization', 'pdf');
-    title('Synergy: recruitment network');
-    
-    subplot(3,3,2);
-    redundancy_all = histogram(all_PID(:,5), 'Normalization', 'pdf');
-    title('Redundancy: all triplets');
-    
-    subplot(3,3,5);
-    redundancy_func = histogram(functional_PID(:,5), 'Normalization', 'pdf');
-    title('Redundancy: functional network');
-    
-    subplot(3,3,8);
-    redundancy_recr = histogram(recruitment_PID(:,5), 'Normalization', 'pdf');
-    title('Redundancy: recruitment network');
-    
-    subplot(3,3,3);
-    unique_all = histogram(all_PID(:,6:7), 'Normalization', 'pdf');
-    title('Unique: all triplets');
-    
-    subplot(3,3,6);
-    unique_func = histogram(functional_PID(:,6:7), 'Normalization', 'pdf');
-    title('Unique: functional network');
-    
-    subplot(3,3,9);
-    unique_recr = histogram(recruitment_PID(:,6:7), 'Normalization', 'pdf');
-    title('Unique: recruitment network');
-    
-    synergy = [synergy_all synergy_func synergy_recr];
-    redundancy = [redundancy_all redundancy_func redundancy_recr];
-    unique = [unique_all unique_func unique_recr];
+        subplot(3,3,(i-1)*3+2);
+        histogram(varargin{i}(:,5), 'Normalization', 'pdf');
+        title('Redundancy');
+
+        subplot(3,3,(i-1)*3+3);
+        histogram(varargin{i}(:,6:7), 'Normalization', 'pdf');
+        title('Unique');
+    end
 end
