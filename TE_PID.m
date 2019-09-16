@@ -67,6 +67,7 @@ function TE_PID(output_filename, input_data, delay, triplet_list, time_resolutio
         if nargin==3 || isempty(triplet_list)
             % Generate list of all possible triplets.
             length_vector = 1:size(input_data,2);
+            % Remove inactive neurons.
             for i = length_vector
                 if size(unique(input_data(:,i)),1) == 1
                     fprintf(output_file, 'Neuron %1u has zero entropy. Discarding all triplets containing neuron %1u.\n', i, i);

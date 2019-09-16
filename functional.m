@@ -5,13 +5,19 @@
 % satisfying TE(source1->target)>TE(target->source1) and
 % TE(source2->target)>TE(target->source2) at the given time-delay.
 %
+% The functional network is calculated using pairwise transfer entropy with
+% the given delay. Bidirectional connections are only possible if transfer
+% entropy in both directions are equal and non-zero. A histogram of
+% differences between non-zero functional weights when swapping target and
+% source is also returned.
+%
 % Optionally input a threshold percentage. E.g. if input threshold is 80%,
 % result will discard bottom 80% of non-zero functional connections.
 %
 % This function is designed to filter neuron triplets for transfer entropy
 % partial information decomposition calculation.
 
-function [functional_triplets, threshold_matrix, weight_diff_hist] = functional(input_timeseries, delay, threshold)
+function [functional_triplets, functional_matrix, weight_diff_hist] = functional(input_timeseries, delay, threshold)
     % Check if input formats are acceptable.
     if ~ismatrix(input_timeseries)
         error('Input time-series must be a matrix.')
@@ -35,36 +41,31 @@ function [functional_triplets, threshold_matrix, weight_diff_hist] = functional(
     % directional matrix. Conversely, if greater transfer entropy obtains
     % when j lags behind i, we record TE(j->i in element (j,i) of the
     % directional matrix.
-    threshold_matrix = zeros(size(input_timeseries,2), size(input_timeseries,2));
-    weight_diff = zeros(size(input_timeseries,2));
-    index = 1;
-    % Initialize list of all undirected neuron pairs.
+    functional_matrix = zeros(size(input_timeseries,2), size(input_timeseries,2));
+    % Initialize list of all undirected active neuron pairs.
     length_vector = 1:size(input_timeseries,2);
-    neuron_pairs = nchoosek(length_vector,2);
-    for pair = neuron_pairs'
-        threshold_matrix(pair(1),pair(2)) = TE(input_timeseries(:,pair(2)), input_timeseries(:,pair(1)), delay);
-        threshold_matrix(pair(2),pair(1)) = TE(input_timeseries(:,pair(1)), input_timeseries(:,pair(2)), delay);
-        weight_diff(index) = abs(threshold_matrix(pair(1),pair(2))-threshold_matrix(pair(2),pair(1)));
-        index = index + 1;
+    for i = length_vector
+        if size(unique(input_timeseries(:,i)),1) == 1
+            length_vector(length_vector==i) = 0;
+        end
     end
-    clear index
-    weight_diff_hist = histogram(weight_diff);
-    for pair = neuron_pairs'
-        i_to_j = threshold_matrix(pair(1),pair(2));
-        j_to_i = threshold_matrix(pair(2),pair(1));
-        if i_to_j > j_to_i
-            threshold_matrix(pair(2),pair(1)) = 0;
-        elseif i_to_j < j_to_i
-            threshold_matrix(pair(1),pair(2)) = 0;
-        elseif i_to_j==0 && j_to_i==0
-        elseif i_to_j==j_to_i
+    length_vector(length_vector==0) = [];
+    neuron_pairs = nchoosek(length_vector,2);
+    % Initialize vector of differences between weights w(ij) and w(ji).
+    weight_diff = zeros(size(neuron_pairs,1),1);
+    for i = 1:size(neuron_pairs,1)
+        functional_matrix(neuron_pairs(i,1),neuron_pairs(i,2)) = TE(input_timeseries(:,neuron_pairs(i,2)), input_timeseries(:,neuron_pairs(i,1)), delay);
+        functional_matrix(neuron_pairs(i,2),neuron_pairs(i,1)) = TE(input_timeseries(:,neuron_pairs(i,1)), input_timeseries(:,neuron_pairs(i,2)), delay);
+        weight_diff(i) = abs(functional_matrix(neuron_pairs(i,1),neuron_pairs(i,2))-functional_matrix(neuron_pairs(i,2),neuron_pairs(i,1)));
+        if functional_matrix(neuron_pairs(i,1),neuron_pairs(i,2)) > functional_matrix(neuron_pairs(i,2),neuron_pairs(i,1))
+            functional_matrix(neuron_pairs(i,2),neuron_pairs(i,1)) = 0;
+        elseif functional_matrix(neuron_pairs(i,1),neuron_pairs(i,2)) < functional_matrix(neuron_pairs(i,2),neuron_pairs(i,1))
+            functional_matrix(neuron_pairs(i,1),neuron_pairs(i,2)) = 0;
+        else
 %             disp('Transfer entropy in both directions are equal.')
         end
     end
-    clear neuron_pairs
-    clear i
-    clear i_to_j
-    clear j_to_i
+    clear input_timeseries
     % Threshold.
     if nargin == 3
         if ~isscalar(threshold)
@@ -72,22 +73,24 @@ function [functional_triplets, threshold_matrix, weight_diff_hist] = functional(
         elseif (threshold>1) || (threshold<0)
             error('Threshold must be between 0 and 1.')
         else
-            ordered_weights = sort(threshold_matrix(:));
+            ordered_weights = sort(functional_matrix(:));
             ordered_weights(ordered_weights==0) = [];
             threshold_value = ordered_weights(floor(threshold*size(ordered_weights,1)));
-            threshold_matrix(threshold_matrix<threshold_value) = 0;
+            ithreshold = false(size(weight_diff,1),1);
+            for i = 1:size(neuron_pairs,1)
+                if ((functional_matrix(neuron_pairs(i,1),neuron_pairs(i,2))>0) && (functional_matrix(neuron_pairs(i,1),neuron_pairs(i,2))<threshold_value)) || ((functional_matrix(neuron_pairs(i,2),neuron_pairs(i,1))>0) && (functional_matrix(neuron_pairs(i,2),neuron_pairs(i,1))<threshold_value))
+                    ithreshold(i) = 1;
+                end
+            end
+            weight_diff(ithreshold) = [];
+            functional_matrix(functional_matrix<threshold_value) = 0;
         end
         clear threshold_value
         clear ordered_weights
     end
-    % Initialize nx3 matrix of all targeted non-zero neuron triplets.
-    for i = length_vector
-        if size(unique(input_timeseries(:,i)),1) == 1
-            length_vector(i) = 0;
-        end
-    end
-    clear input_timeseries
-    length_vector(length_vector==0) = [];
+    weight_diff_hist = histogram(weight_diff);
+    title('Difference between non-zero functional weights w(ij) and w(ji)');
+    % Initialize nx3 matrix of all targeted non-zero neuron triplets, where column one indicates the target neuron.
     target_1 = nchoosek(length_vector,3);
     target_2 = circshift(target_1,1,2);
     target_3 = circshift(target_1,-1,2);
@@ -105,10 +108,10 @@ function [functional_triplets, threshold_matrix, weight_diff_hist] = functional(
     % Initialize dummy variable to indicate rows of output matrix.
     row_index = 1;
     for i = all_triplets_list'
-        if (threshold_matrix(i(1), i(2))>0) && (threshold_matrix(i(1), i(3))>0)
+        if (functional_matrix(i(2), i(1))>0) && (functional_matrix(i(3), i(1))>0)
             functional_triplets(row_index,:) = i'; % Write to row of output matrix indicated by row_index.
-            row_index = row_index+1; % Increment dummy variable by 1.
+            row_index = row_index+1;
         end
     end
-    functional_triplets(functional_triplets(:,1)==0,:) = []; % Remove zeroes.
+    functional_triplets(functional_triplets(:,1)==0,:) = []; % Remove extra rows.
 end
