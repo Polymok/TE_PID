@@ -11,7 +11,7 @@
 % This function is designed to filter neuron triplets for transfer entropy
 % partial information decomposition calculation.
 
-function [functional_triplets, threshold_matrix] = functional(input_timeseries, delay, threshold)
+function [functional_triplets, threshold_matrix, weight_diff_hist] = functional(input_timeseries, delay, threshold)
     % Check if input formats are acceptable.
     if ~ismatrix(input_timeseries)
         error('Input time-series must be a matrix.')
@@ -36,21 +36,29 @@ function [functional_triplets, threshold_matrix] = functional(input_timeseries, 
     % when j lags behind i, we record TE(j->i in element (j,i) of the
     % directional matrix.
     threshold_matrix = zeros(size(input_timeseries,2), size(input_timeseries,2));
+    weight_diff = zeros(size(input_timeseries,2));
+    index = 1;
     % Initialize list of all undirected neuron pairs.
     length_vector = 1:size(input_timeseries,2);
     neuron_pairs = nchoosek(length_vector,2);
     for pair = neuron_pairs'
-        i_to_j = TE(input_timeseries(:,pair(2)), input_timeseries(:,pair(1)), delay);
-        j_to_i = TE(input_timeseries(:,pair(1)), input_timeseries(:,pair(2)), delay);
+        threshold_matrix(pair(1),pair(2)) = TE(input_timeseries(:,pair(2)), input_timeseries(:,pair(1)), delay);
+        threshold_matrix(pair(2),pair(1)) = TE(input_timeseries(:,pair(1)), input_timeseries(:,pair(2)), delay);
+        weight_diff(index) = abs(threshold_matrix(pair(1),pair(2))-threshold_matrix(pair(2),pair(1)));
+        index = index + 1;
+    end
+    clear index
+    weight_diff_hist = histogram(weight_diff);
+    for pair = neuron_pairs'
+        i_to_j = threshold_matrix(pair(1),pair(2));
+        j_to_i = threshold_matrix(pair(2),pair(1));
         if i_to_j > j_to_i
-            threshold_matrix(pair(1),pair(2)) = i_to_j;
+            threshold_matrix(pair(2),pair(1)) = 0;
         elseif i_to_j < j_to_i
-            threshold_matrix(pair(2),pair(1)) = j_to_i;
+            threshold_matrix(pair(1),pair(2)) = 0;
         elseif i_to_j==0 && j_to_i==0
         elseif i_to_j==j_to_i
 %             disp('Transfer entropy in both directions are equal.')
-            threshold_matrix(pair(1),pair(2)) = i_to_j;
-            threshold_matrix(pair(2),pair(1)) = j_to_i;
         end
     end
     clear neuron_pairs
