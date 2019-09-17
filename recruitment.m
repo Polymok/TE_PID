@@ -1,7 +1,7 @@
 % This function finds the recruitment matrix, i.e. the intersection of the
 % functional matrix and the synaptic connectivity matrix.
 
-function [recruitment_triplets, recruitment_matrix] = recruitment(functional_matrix, synaptic_matrix, threshold)
+function [recruitment_triplets, recruitment_matrix, num_bidirectional] = recruitment(functional_matrix, synaptic_matrix, threshold)
     if ~ismatrix(functional_matrix) || ~ismatrix(synaptic_matrix)
         error('Input weight matrices must be matrices.')
     elseif (size(functional_matrix,1)~=size(synaptic_matrix,1)) || (size(functional_matrix,2)~=size(synaptic_matrix,2))
@@ -19,14 +19,20 @@ function [recruitment_triplets, recruitment_matrix] = recruitment(functional_mat
             ordered_weights(ordered_weights==0) = [];
             threshold_value = ordered_weights(floor(threshold*size(ordered_weights,1)));
             synaptic_matrix(synaptic_matrix<threshold_value) = 0;
+            clear ordered_weights
+            clear threshold_value
+            clear threshold
         end
     end
     % Initialize recruitment network weight matrix.
     recruitment_matrix = functional_matrix;
+    clear functional_matrix
     % Intersect functional matrix with synaptic matrix.
     recruitment_matrix(synaptic_matrix==0) = 0;
+    clear synaptic_matrix
+    num_bidirectional = sum(sum(recruitment_matrix==recruitment_matrix'&recruitment_matrix>0))/2;
     % Initialize nx3 matrix of all targeted non-zero neuron triplets.
-    length_vector = 1:size(functional_matrix,2);
+    length_vector = 1:size(recruitment_matrix,2);
     target_1 = nchoosek(length_vector,3);
     target_2 = circshift(target_1,1,2);
     target_3 = circshift(target_1,-1,2);

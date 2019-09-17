@@ -9,7 +9,8 @@
 % the given delay. Bidirectional connections are only possible if transfer
 % entropy in both directions are equal and non-zero. A histogram of
 % differences between non-zero functional weights when swapping target and
-% source is also returned.
+% source is also returned, as well as the number of bidirectional
+% connections.
 %
 % Optionally input a threshold percentage. E.g. if input threshold is 80%,
 % result will discard bottom 80% of non-zero functional connections.
@@ -17,7 +18,7 @@
 % This function is designed to filter neuron triplets for transfer entropy
 % partial information decomposition calculation.
 
-function [functional_triplets, functional_matrix, weight_diff_hist] = functional(input_timeseries, delay, threshold)
+function [functional_triplets, functional_matrix, weight_diff, num_bidirectional] = functional(input_timeseries, delay, threshold)
     % Check if input formats are acceptable.
     if ~ismatrix(input_timeseries)
         error('Input time-series must be a matrix.')
@@ -53,16 +54,20 @@ function [functional_triplets, functional_matrix, weight_diff_hist] = functional
     neuron_pairs = nchoosek(length_vector,2);
     % Initialize vector of differences between weights w(ij) and w(ji).
     weight_diff = zeros(size(neuron_pairs,1),1);
+    izeros = false(size(weight_diff,1),1);
     for i = 1:size(neuron_pairs,1)
         functional_matrix(neuron_pairs(i,1),neuron_pairs(i,2)) = TE(input_timeseries(:,neuron_pairs(i,2)), input_timeseries(:,neuron_pairs(i,1)), delay);
         functional_matrix(neuron_pairs(i,2),neuron_pairs(i,1)) = TE(input_timeseries(:,neuron_pairs(i,1)), input_timeseries(:,neuron_pairs(i,2)), delay);
-        weight_diff(i) = abs(functional_matrix(neuron_pairs(i,1),neuron_pairs(i,2))-functional_matrix(neuron_pairs(i,2),neuron_pairs(i,1)));
-        if functional_matrix(neuron_pairs(i,1),neuron_pairs(i,2)) > functional_matrix(neuron_pairs(i,2),neuron_pairs(i,1))
-            functional_matrix(neuron_pairs(i,2),neuron_pairs(i,1)) = 0;
-        elseif functional_matrix(neuron_pairs(i,1),neuron_pairs(i,2)) < functional_matrix(neuron_pairs(i,2),neuron_pairs(i,1))
-            functional_matrix(neuron_pairs(i,1),neuron_pairs(i,2)) = 0;
+        if (functional_matrix(neuron_pairs(i,1),neuron_pairs(i,2))==0) && (functional_matrix(neuron_pairs(i,2),neuron_pairs(i,1))==0)
+            izeros(i) = 1;
         else
-%             disp('Transfer entropy in both directions are equal.')
+            if functional_matrix(neuron_pairs(i,1),neuron_pairs(i,2)) > functional_matrix(neuron_pairs(i,2),neuron_pairs(i,1))
+                weight_diff(i) = (functional_matrix(neuron_pairs(i,1),neuron_pairs(i,2))-functional_matrix(neuron_pairs(i,2),neuron_pairs(i,1))) / functional_matrix(neuron_pairs(i,1),neuron_pairs(i,2));
+                functional_matrix(neuron_pairs(i,2),neuron_pairs(i,1)) = 0;
+            elseif functional_matrix(neuron_pairs(i,1),neuron_pairs(i,2)) < functional_matrix(neuron_pairs(i,2),neuron_pairs(i,1))
+                weight_diff(i) = (functional_matrix(neuron_pairs(i,2),neuron_pairs(i,1))-functional_matrix(neuron_pairs(i,1),neuron_pairs(i,2))) / functional_matrix(neuron_pairs(i,2),neuron_pairs(i,1));
+                functional_matrix(neuron_pairs(i,1),neuron_pairs(i,2)) = 0;
+            end
         end
     end
     clear input_timeseries
@@ -82,14 +87,18 @@ function [functional_triplets, functional_matrix, weight_diff_hist] = functional
                     ithreshold(i) = 1;
                 end
             end
-            weight_diff(ithreshold) = [];
+            weight_diff(ithreshold|izeros) = [];
             functional_matrix(functional_matrix<threshold_value) = 0;
         end
         clear threshold_value
         clear ordered_weights
+        clear izeros
+        clear ithreshold
+    else
+        weight_diff(izeros) = [];
+        clear izeros
     end
-    weight_diff_hist = histogram(weight_diff);
-    title('Difference between non-zero functional weights w(ij) and w(ji)');
+    num_bidirectional = sum(sum(functional_matrix==functional_matrix'&functional_matrix>0))/2;
     % Initialize nx3 matrix of all targeted non-zero neuron triplets, where column one indicates the target neuron.
     target_1 = nchoosek(length_vector,3);
     target_2 = circshift(target_1,1,2);
