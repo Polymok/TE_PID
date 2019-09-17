@@ -7,10 +7,12 @@
 %
 % The functional network is calculated using pairwise transfer entropy with
 % the given delay. Bidirectional connections are only possible if transfer
-% entropy in both directions are equal and non-zero. A histogram of
+% entropy in both directions are equal and non-zero. An array of percentage
 % differences between non-zero functional weights when swapping target and
-% source is also returned, as well as the number of bidirectional
-% connections.
+% source is also returned. This percentage is taken over the larger of the
+% two transfer entropy values. The number of active functional neurons, the
+% number of functional connections, and the number of
+% bidirectional connections are printed to the command window.
 %
 % Optionally input a threshold percentage. E.g. if input threshold is 80%,
 % result will discard bottom 80% of non-zero functional connections.
@@ -18,7 +20,7 @@
 % This function is designed to filter neuron triplets for transfer entropy
 % partial information decomposition calculation.
 
-function [functional_triplets, functional_matrix, weight_diff, num_bidirectional] = functional(input_timeseries, delay, threshold)
+function [functional_triplets, functional_matrix, weight_diff] = functional(input_timeseries, delay, threshold)
     % Check if input formats are acceptable.
     if ~ismatrix(input_timeseries)
         error('Input time-series must be a matrix.')
@@ -98,7 +100,12 @@ function [functional_triplets, functional_matrix, weight_diff, num_bidirectional
         weight_diff(izeros) = [];
         clear izeros
     end
-    num_bidirectional = sum(sum(functional_matrix==functional_matrix'&functional_matrix>0))/2;
+    num_active = sum(sum(functional_matrix>0)>0);
+    num_connect = sum(sum(functional_matrix>0));
+    num_bidirect = sum(sum(functional_matrix==functional_matrix'&functional_matrix>0))/2;
+    disp(['Number of active functional neurons: ', num2str(num_active)]);
+    disp(['Number of functional connections: ', num2str(num_connect)]);
+    disp(['Number of bidirectional functional connections: ', num2str(num_bidirect)]);
     % Initialize nx3 matrix of all targeted non-zero neuron triplets, where column one indicates the target neuron.
     target_1 = nchoosek(length_vector,3);
     target_2 = circshift(target_1,1,2);

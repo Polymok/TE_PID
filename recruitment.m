@@ -1,7 +1,11 @@
 % This function finds the recruitment matrix, i.e. the intersection of the
 % functional matrix and the synaptic connectivity matrix.
+% 
+% The number of active recruitment neurons, the number of recruitment
+% connections, and the number of bidirectional recruitment connections are
+% printed to the command window.
 
-function [recruitment_triplets, recruitment_matrix, num_bidirectional] = recruitment(functional_matrix, synaptic_matrix, threshold)
+function [recruitment_triplets, recruitment_matrix] = recruitment(functional_matrix, synaptic_matrix, threshold)
     if ~ismatrix(functional_matrix) || ~ismatrix(synaptic_matrix)
         error('Input weight matrices must be matrices.')
     elseif (size(functional_matrix,1)~=size(synaptic_matrix,1)) || (size(functional_matrix,2)~=size(synaptic_matrix,2))
@@ -30,7 +34,12 @@ function [recruitment_triplets, recruitment_matrix, num_bidirectional] = recruit
     % Intersect functional matrix with synaptic matrix.
     recruitment_matrix(synaptic_matrix==0) = 0;
     clear synaptic_matrix
-    num_bidirectional = sum(sum(recruitment_matrix==recruitment_matrix'&recruitment_matrix>0))/2;
+    num_active = sum(sum(recruitment_matrix>0));
+    num_connect = sum(sum(recruitment_matrix>0)>0);
+    num_bidirect = sum(sum(recruitment_matrix==recruitment_matrix'&recruitment_matrix>0))/2;
+    disp(['Number of active recruitment neurons: ', num2str(num_active)]);
+    disp(['Number of recruitment connections: ', num2str(num_connect)]);
+    disp(['Number of bidirectional recruitment connections: ', num2str(num_bidirect)]);
     % Initialize nx3 matrix of all targeted non-zero neuron triplets.
     length_vector = 1:size(recruitment_matrix,2);
     target_1 = nchoosek(length_vector,3);
