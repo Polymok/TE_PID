@@ -50,6 +50,51 @@ As expected, all transfer entropy information is found in *unique1* for the `ide
 
 In the case of `and`, small values obtain for *unique1* and *unique2*, contrary to the expected zero value. This may be due to rounding error.
 
+### Sample workflow
+
+#### Inputs:
+
+`spiketrain.mat`: *n*x*m* matrix of *m* neurons, each with *n* time steps.
+
+`synaptic_matrix.mat`: *m*x*m* matrix of synaptic weights between *m* neurons.
+
+#### Command window:
+
+```
+>> load spiketrain.mat  
+>> load synaptic_matrix.mat  
+>> TE_PID('output.csv', spiketrain, 1, [], 20);  
+...  
+>> all_PID = readmatrix('output.csv');  
+>> [func_list, func_mat, deltaw] = functional(timebin(spiketrain, 20), 1);  
+>> [recr_list, recr_mat] = recruitment(func_mat, synaptic_matrix);  
+>> func_PID = PID_extract(all_PID, func_list);  
+>> recr_PID = PID_extract(all_PID, recr_list);
+>> fig = PID_plot(all_PID, func_PID, recr_PID);  
+```
+
+#### Outputs:
+
+##### Folder:
+
+`output.csv`: record of inactive neuron indices, entropy of all active neurons, and transfer PID values for all active neuron triplets.
+
+##### Workspace:
+
+`all_PID`: 7-column matrix of transfer PID values for all active neuron triplets.
+
+`func_list`: 3-column matrix of neuron indices forming a functional triplet where transfer entropies from source neurons in the 2nd and 3rd columns to the target neuron in the 1st column are both greater than zero. Note that this is a subset of `all_PID(:,1:3)`.
+
+`func_mat`: *m*x*m* matrix of functional weights between all *m* neurons. Bidirectional connections occurs only if transfer entropy in both directions are equal for a given neuron pair.
+
+`deltaw`: vector of differences between functional weights *w(ij)* and *w(ji)* for non-zero transfer entropies.
+
+`recr_list`: 3-column matrix of neuron indices forming a recruitment triplet. Note that this is a subset of both `all_PID(:,1:3` and `func_list`.
+
+`recr_mat`: *m*x*m* matrix of recruitment weights between all *m* neurons. Note that this is a subset of `func_mat`.
+
+`fig`: figure object plotting histograms of synergy, redundancy, and unique PID values for all triplets, functional triplets, and recruitment triplets. Use `findobj.m` to adjust axes or histogram properties.
+
 ## Functions
 
 ### `TE_PID.m`
