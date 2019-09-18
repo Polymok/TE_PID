@@ -60,16 +60,14 @@ function [functional_triplets, functional_matrix, weight_diff] = functional(inpu
     for i = 1:size(neuron_pairs,1)
         functional_matrix(neuron_pairs(i,1),neuron_pairs(i,2)) = TE(input_timeseries(:,neuron_pairs(i,2)), input_timeseries(:,neuron_pairs(i,1)), delay);
         functional_matrix(neuron_pairs(i,2),neuron_pairs(i,1)) = TE(input_timeseries(:,neuron_pairs(i,1)), input_timeseries(:,neuron_pairs(i,2)), delay);
-        if (functional_matrix(neuron_pairs(i,1),neuron_pairs(i,2))==0) && (functional_matrix(neuron_pairs(i,2),neuron_pairs(i,1))==0)
+        if (functional_matrix(neuron_pairs(i,1),neuron_pairs(i,2))==0) || (functional_matrix(neuron_pairs(i,2),neuron_pairs(i,1))==0)
             izeros(i) = 1;
-        else
-            if functional_matrix(neuron_pairs(i,1),neuron_pairs(i,2)) > functional_matrix(neuron_pairs(i,2),neuron_pairs(i,1))
-                weight_diff(i) = (functional_matrix(neuron_pairs(i,1),neuron_pairs(i,2))-functional_matrix(neuron_pairs(i,2),neuron_pairs(i,1))) / functional_matrix(neuron_pairs(i,1),neuron_pairs(i,2));
-                functional_matrix(neuron_pairs(i,2),neuron_pairs(i,1)) = 0;
-            elseif functional_matrix(neuron_pairs(i,1),neuron_pairs(i,2)) < functional_matrix(neuron_pairs(i,2),neuron_pairs(i,1))
-                weight_diff(i) = (functional_matrix(neuron_pairs(i,2),neuron_pairs(i,1))-functional_matrix(neuron_pairs(i,1),neuron_pairs(i,2))) / functional_matrix(neuron_pairs(i,2),neuron_pairs(i,1));
-                functional_matrix(neuron_pairs(i,1),neuron_pairs(i,2)) = 0;
-            end
+        elseif functional_matrix(neuron_pairs(i,1),neuron_pairs(i,2)) > functional_matrix(neuron_pairs(i,2),neuron_pairs(i,1))
+            weight_diff(i) = (functional_matrix(neuron_pairs(i,1),neuron_pairs(i,2))-functional_matrix(neuron_pairs(i,2),neuron_pairs(i,1))) / functional_matrix(neuron_pairs(i,2),neuron_pairs(i,1));
+            functional_matrix(neuron_pairs(i,2),neuron_pairs(i,1)) = 0;
+        elseif functional_matrix(neuron_pairs(i,1),neuron_pairs(i,2)) < functional_matrix(neuron_pairs(i,2),neuron_pairs(i,1))
+            weight_diff(i) = (functional_matrix(neuron_pairs(i,2),neuron_pairs(i,1))-functional_matrix(neuron_pairs(i,1),neuron_pairs(i,2))) / functional_matrix(neuron_pairs(i,1),neuron_pairs(i,2));
+            functional_matrix(neuron_pairs(i,1),neuron_pairs(i,2)) = 0;
         end
     end
     clear input_timeseries
