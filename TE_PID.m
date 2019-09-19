@@ -79,9 +79,7 @@ function TE_PID(output_filename, input_data, delay, triplet_list, time_resolutio
             target_2 = circshift(target_1,1,2);
             target_3 = circshift(target_1,-1,2);
             triplet_list = [target_1; target_2; target_3];
-            clear target_1
-            clear target_2
-            clear target_3
+            clear target_1 target_2 target_3;
         else
             if ~ismatrix(triplet_list)
                 error('List of neuron triplets must be a matrix.')
@@ -115,8 +113,7 @@ function TE_PID(output_filename, input_data, delay, triplet_list, time_resolutio
                 end
             fprintf(output_file, '%1u, %.6g\n', i, entropy);
         end
-        clear prob
-        clear entropy
+        clear prob entropy
         fprintf(output_file, 'Target, Source1, Source2, Synergy, Redundancy, Unique1, Unique2\n');
         % Calculate and store transfer entropies from single source to single target.
         targeted_pairs = unique([triplet_list(:,1:2); triplet_list(:,1) triplet_list(:,3)], 'rows');
@@ -127,9 +124,7 @@ function TE_PID(output_filename, input_data, delay, triplet_list, time_resolutio
             single_TEs(row_index,3) = TE(input_data(:,i(1)), input_data(:,i(2)), delay);
             row_index = row_index + 1;
         end
-        clear length_vector
-        clear targeted_pairs
-        clear row_index
+        clear length_vector targeted_pairs row_index
         % Import all neuron triplets from triplet_list.
         for i = triplet_list'
             redundancy = I_min_TE(input_data(:,i(1)), input_data(:,i(2)), input_data(:,i(3)), delay);

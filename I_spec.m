@@ -40,6 +40,7 @@ function [spec_info] = I_spec(target, target_future_value, delay, opt_source)
     target_future(1:delay) = [];
     target_past = target;
     target_past((length(target)-delay+1):length(target)) = [];
+    clear target;
     opt_source((length(opt_source)-delay+1):length(opt_source)) = [];
     spec_info = 0; % Initialize output.
     % Sum over all possible values that the two time-series may take.

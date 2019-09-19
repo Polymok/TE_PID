@@ -23,9 +23,7 @@ function [recruitment_triplets, recruitment_matrix] = recruitment(functional_mat
             ordered_weights(ordered_weights==0) = [];
             threshold_value = ordered_weights(floor(threshold*size(ordered_weights,1)));
             synaptic_matrix(synaptic_matrix<threshold_value) = 0;
-            clear ordered_weights
-            clear threshold_value
-            clear threshold
+            clear ordered_weights threshold_value threshold
         end
     end
     % Initialize recruitment network weight matrix.
@@ -34,21 +32,16 @@ function [recruitment_triplets, recruitment_matrix] = recruitment(functional_mat
     % Intersect functional matrix with synaptic matrix.
     recruitment_matrix(synaptic_matrix==0) = 0;
     clear synaptic_matrix
-    num_active = sum(sum(recruitment_matrix>0));
-    num_connect = sum(sum(recruitment_matrix>0)>0);
-    num_bidirect = sum(sum(recruitment_matrix==recruitment_matrix'&recruitment_matrix>0))/2;
-    disp(['Number of active recruitment neurons: ', num2str(num_active)]);
-    disp(['Number of recruitment connections: ', num2str(num_connect)]);
-    disp(['Number of bidirectional recruitment connections: ', num2str(num_bidirect)]);
+    disp(['Number of active recruitment neurons: ', num2str(sum(sum(recruitment_matrix>0)))]);
+    disp(['Number of recruitment connections: ', num2str(sum(sum(recruitment_matrix>0)>0))]);
+    disp(['Number of bidirectional recruitment connections: ', num2str(sum(sum(recruitment_matrix==recruitment_matrix'&recruitment_matrix>0))/2)]);
     % Initialize nx3 matrix of all targeted non-zero neuron triplets.
     length_vector = 1:size(recruitment_matrix,2);
     target_1 = nchoosek(length_vector,3);
     target_2 = circshift(target_1,1,2);
     target_3 = circshift(target_1,-1,2);
     all_triplets_list = [target_1; target_2; target_3];
-    clear target_1
-    clear target_2
-    clear target_3
+    clear target_1 target_2 target_3;
     % Initialize list of targeted neuron triplets of the recruitment network.
     syms n
     recruitment_triplets = zeros(double(symsum(nchoosek(n,2), n, 2, size(length_vector,2)-1)), 3);

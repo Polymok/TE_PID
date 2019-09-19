@@ -34,6 +34,7 @@ function [transfer_entropy, normed_TE] = TE(target, source, delay)
     target_past((size(target,1)-delay+1):size(target,1),:) = [];
     source_past = source;
     source_past((size(source,1)-delay+1):size(source,1),:) = [];
+    clear target source;
     transfer_entropy = cond_MI(source_past, target_future, target_past);
     % Normalize by entropy of target time-series.
     if nargout==2

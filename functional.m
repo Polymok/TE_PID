@@ -20,7 +20,7 @@
 % This function is designed to filter neuron triplets for transfer entropy
 % partial information decomposition calculation.
 
-function [functional_triplets, functional_matrix, weight_diff] = functional(input_timeseries, delay, threshold)
+function [functional_triplets, functional_matrix, weight_diff, raw_TE_matrix] = functional(input_timeseries, delay, threshold)
     % Check if input formats are acceptable.
     if ~ismatrix(input_timeseries)
         error('Input time-series must be a matrix.')
@@ -54,12 +54,18 @@ function [functional_triplets, functional_matrix, weight_diff] = functional(inpu
     end
     length_vector(length_vector==0) = [];
     neuron_pairs = nchoosek(length_vector,2);
+    for i = 1:size(neuron_pairs,1)
+        functional_matrix(neuron_pairs(i,1),neuron_pairs(i,2)) = TE(input_timeseries(:,neuron_pairs(i,2)), input_timeseries(:,neuron_pairs(i,1)), delay);
+        functional_matrix(neuron_pairs(i,2),neuron_pairs(i,1)) = TE(input_timeseries(:,neuron_pairs(i,1)), input_timeseries(:,neuron_pairs(i,2)), delay);
+    end
+    clear input_timeseries
+    if nargout == 4
+        raw_TE_matrix = functional_matrix;
+    end
     % Initialize vector of differences between weights w(ij) and w(ji).
     weight_diff = zeros(size(neuron_pairs,1),1);
     izeros = false(size(weight_diff,1),1);
     for i = 1:size(neuron_pairs,1)
-        functional_matrix(neuron_pairs(i,1),neuron_pairs(i,2)) = TE(input_timeseries(:,neuron_pairs(i,2)), input_timeseries(:,neuron_pairs(i,1)), delay);
-        functional_matrix(neuron_pairs(i,2),neuron_pairs(i,1)) = TE(input_timeseries(:,neuron_pairs(i,1)), input_timeseries(:,neuron_pairs(i,2)), delay);
         if (functional_matrix(neuron_pairs(i,1),neuron_pairs(i,2))==0) || (functional_matrix(neuron_pairs(i,2),neuron_pairs(i,1))==0)
             izeros(i) = 1;
         elseif functional_matrix(neuron_pairs(i,1),neuron_pairs(i,2)) > functional_matrix(neuron_pairs(i,2),neuron_pairs(i,1))
@@ -70,7 +76,6 @@ function [functional_triplets, functional_matrix, weight_diff] = functional(inpu
             functional_matrix(neuron_pairs(i,1),neuron_pairs(i,2)) = 0;
         end
     end
-    clear input_timeseries
     % Threshold.
     if nargin == 3
         if ~isscalar(threshold)
@@ -87,31 +92,24 @@ function [functional_triplets, functional_matrix, weight_diff] = functional(inpu
                     ithreshold(i) = 1;
                 end
             end
+            clear neuron_pairs
             weight_diff(ithreshold|izeros) = [];
             functional_matrix(functional_matrix<threshold_value) = 0;
         end
-        clear threshold_value
-        clear ordered_weights
-        clear izeros
-        clear ithreshold
+        clear threshold_value ordered_weights izeros ithreshold
     else
         weight_diff(izeros) = [];
         clear izeros
     end
-    num_active = sum(sum(functional_matrix>0)>0);
-    num_connect = sum(sum(functional_matrix>0));
-    num_bidirect = sum(sum(functional_matrix==functional_matrix'&functional_matrix>0))/2;
-    disp(['Number of active functional neurons: ', num2str(num_active)]);
-    disp(['Number of functional connections: ', num2str(num_connect)]);
-    disp(['Number of bidirectional functional connections: ', num2str(num_bidirect)]);
+    disp(['Number of active functional neurons: ', num2str(sum(sum(functional_matrix>0)>0))]);
+    disp(['Number of functional connections: ', num2str(sum(sum(functional_matrix>0)))]);
+    disp(['Number of bidirectional functional connections: ', num2str(sum(sum(functional_matrix==functional_matrix'&functional_matrix>0))/2)]);
     % Initialize nx3 matrix of all targeted non-zero neuron triplets, where column one indicates the target neuron.
     target_1 = nchoosek(length_vector,3);
     target_2 = circshift(target_1,1,2);
     target_3 = circshift(target_1,-1,2);
     all_triplets_list = [target_1; target_2; target_3];
-    clear target_1
-    clear target_2
-    clear target_3
+    clear target_1 target_2 target_3
     % Initialize output whose rows contain neuron triplets ijk that satisfy
     % TE(j->i)>TE(i->j) and TE(k->i)>TE(i->k) at the given time-delay.
     % Columns indicate in increasing order:
