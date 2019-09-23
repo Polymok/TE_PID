@@ -32,8 +32,8 @@ function [recruitment_triplets, recruitment_matrix] = recruitment(functional_mat
     % Intersect functional matrix with synaptic matrix.
     recruitment_matrix(synaptic_matrix==0) = 0;
     clear synaptic_matrix
-    disp(['Number of active recruitment neurons: ', num2str(sum(sum(recruitment_matrix>0)))]);
-    disp(['Number of recruitment connections: ', num2str(sum(sum(recruitment_matrix>0)>0))]);
+    disp(['Number of active recruitment neurons: ', num2str(sum(sum(recruitment_matrix>0)>0))]);
+    disp(['Number of recruitment connections: ', num2str(sum(sum(recruitment_matrix>0)))]);
     disp(['Number of bidirectional recruitment connections: ', num2str(sum(sum(recruitment_matrix==recruitment_matrix'&recruitment_matrix>0))/2)]);
     % Initialize nx3 matrix of all targeted non-zero neuron triplets.
     length_vector = 1:size(recruitment_matrix,2);
