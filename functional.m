@@ -74,6 +74,8 @@ function [functional_triplets, functional_matrix, weight_diff, raw_TE_matrix] = 
         elseif functional_matrix(neuron_pairs(i,1),neuron_pairs(i,2)) < functional_matrix(neuron_pairs(i,2),neuron_pairs(i,1))
             weight_diff(i) = (functional_matrix(neuron_pairs(i,2),neuron_pairs(i,1))-functional_matrix(neuron_pairs(i,1),neuron_pairs(i,2))) / functional_matrix(neuron_pairs(i,1),neuron_pairs(i,2));
             functional_matrix(neuron_pairs(i,1),neuron_pairs(i,2)) = 0;
+        elseif functional_matrix(neuron_pairs(i,1),neuron_pairs(i,2)) == functional_matrix(neuron_pairs(i,2),neuron_pairs(i,1))
+            weight_diff(i) = eps;
         end
     end
     % Threshold.
