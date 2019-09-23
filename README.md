@@ -63,10 +63,12 @@ In the case of `and`, small values obtain for *unique1* and *unique2*, contrary 
 ```
 >> load spiketrain.mat  
 >> load synaptic_matrix.mat  
+>> time_resolution = 20;  
+>> time_delay = 1;  
 >> TE_PID('output.csv', spiketrain, 1, [], 20);  
 ...  
 >> all_PID = readmatrix('output.csv');  
->> [func_list, func_mat, deltaw] = functional(timebin(spiketrain, 20), 1);  
+>> [func_list, func_mat, deltaw] = functional(timebin(spiketrain, time_resolution), time_delay);  
 >> [recr_list, recr_mat] = recruitment(func_mat, synaptic_matrix);  
 >> func_PID = PID_extract(all_PID, func_list);  
 >> recr_PID = PID_extract(all_PID, recr_list);
