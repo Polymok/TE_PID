@@ -3,7 +3,7 @@
 % indices in the two matrices. Only non-zero functional connections (and
 % their corresponding synaptic connections) are considered.
 
-function corr_func_synp =  compare_matrix(functional_matrix, synaptic_matrix, threshold)
+function [zscores, corr_func_synp] =  compare_matrix(functional_matrix, synaptic_matrix, threshold)
     if ~ismatrix(functional_matrix) || ~ismatrix(synaptic_matrix)
         error('Input weight matrices must be matrices.')
     elseif (size(functional_matrix,1)~=size(synaptic_matrix,1)) || (size(functional_matrix,2)~=size(synaptic_matrix,2))
@@ -29,6 +29,6 @@ function corr_func_synp =  compare_matrix(functional_matrix, synaptic_matrix, th
             func_zscore(func_weights<threshold_value) = [];
         end
     end
-    corr_func_synp = corrcoef(func_zscore, synp_zscore);
-    corr_func_synp = corr_func_synp(2);
+    zscores = [func_zscore synp_zscore];
+    corr_func_synp = corrcoef(func_zscore, synp_zscore); corr_func_synp = corr_func_synp(2);
 end
