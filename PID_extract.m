@@ -8,6 +8,6 @@ function subset_PID = PID_extract(all_PID, list)
     elseif size(list,2)~=3
         error('Input list of triplets must have 3 columns.')
     end
-    [~,iall] = intersect(all_PID(:,1:3), list, 'rows');
-    subset_PID = all_PID(iall,:);
+    [~,iAll] = intersect(all_PID(:,1:3), list, 'rows');
+    subset_PID = all_PID(iAll,:);
 end

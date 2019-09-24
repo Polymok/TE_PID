@@ -36,16 +36,16 @@ function [recruitment_triplets, recruitment_matrix] = recruitment(functional_mat
     disp(['Number of recruitment connections: ', num2str(sum(sum(recruitment_matrix>0)))]);
     disp(['Number of bidirectional recruitment connections: ', num2str(sum(sum(recruitment_matrix==recruitment_matrix'&recruitment_matrix>0))/2)]);
     % Initialize nx3 matrix of all targeted non-zero neuron triplets.
-    length_vector = 1:size(recruitment_matrix,2);
-    target_1 = nchoosek(length_vector,3);
+    neuron_list = 1:size(recruitment_matrix,2);
+    target_1 = nchoosek(neuron_list,3);
     target_2 = circshift(target_1,1,2);
     target_3 = circshift(target_1,-1,2);
     all_triplets_list = [target_1; target_2; target_3];
     clear target_1 target_2 target_3;
     % Initialize list of targeted neuron triplets of the recruitment network.
     syms n
-    recruitment_triplets = zeros(double(symsum(nchoosek(n,2), n, 2, size(length_vector,2)-1)), 3);
-    clear length_vector
+    recruitment_triplets = zeros(double(symsum(nchoosek(n,2), n, 2, size(neuron_list,2)-1)), 3); % Upper bound on number of possible fan-in triplets.
+    clear neuron_list
     % Initialize dummy variable to indicate rows of output matrix.
     row_index = 1;
     for i = all_triplets_list'

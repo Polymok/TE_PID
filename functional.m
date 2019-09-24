@@ -46,14 +46,14 @@ function [functional_triplets, functional_matrix, weight_diff, raw_TE_matrix] = 
     % directional matrix.
     functional_matrix = zeros(size(input_timeseries,2), size(input_timeseries,2));
     % Initialize list of all undirected active neuron pairs.
-    length_vector = 1:size(input_timeseries,2);
-    for i = length_vector
+    neuron_list = 1:size(input_timeseries,2);
+    for i = neuron_list
         if size(unique(input_timeseries(:,i)),1) == 1
-            length_vector(length_vector==i) = 0;
+            neuron_list(neuron_list==i) = 0;
         end
     end
-    length_vector(length_vector==0) = [];
-    neuron_pairs = nchoosek(length_vector,2);
+    neuron_list(neuron_list==0) = [];
+    neuron_pairs = nchoosek(neuron_list,2);
     for i = 1:size(neuron_pairs,1)
         functional_matrix(neuron_pairs(i,1),neuron_pairs(i,2)) = TE(input_timeseries(:,neuron_pairs(i,2)), input_timeseries(:,neuron_pairs(i,1)), delay);
         functional_matrix(neuron_pairs(i,2),neuron_pairs(i,1)) = TE(input_timeseries(:,neuron_pairs(i,1)), input_timeseries(:,neuron_pairs(i,2)), delay);
@@ -107,7 +107,7 @@ function [functional_triplets, functional_matrix, weight_diff, raw_TE_matrix] = 
     disp(['Number of functional connections: ', num2str(sum(sum(functional_matrix>0)))]);
     disp(['Number of bidirectional functional connections: ', num2str(sum(sum(functional_matrix==functional_matrix'&functional_matrix>0))/2)]);
     % Initialize nx3 matrix of all targeted non-zero neuron triplets, where column one indicates the target neuron.
-    target_1 = nchoosek(length_vector,3);
+    target_1 = nchoosek(neuron_list,3);
     target_2 = circshift(target_1,1,2);
     target_3 = circshift(target_1,-1,2);
     all_triplets_list = [target_1; target_2; target_3];
@@ -117,12 +117,12 @@ function [functional_triplets, functional_matrix, weight_diff, raw_TE_matrix] = 
     % Columns indicate in increasing order:
     % target | source1 | source2
     syms n
-    functional_triplets = zeros(double(symsum(nchoosek(n,2), n, 2, size(length_vector,2)-1)), 3);
-    clear length_vector
+    functional_triplets = zeros(double(symsum(nchoosek(n,2), n, 2, size(neuron_list,2)-1)), 3); % Upper bound on number of possible fan-in triplets.
+    clear neuron_list
     % Initialize dummy variable to indicate rows of output matrix.
     row_index = 1;
     for i = all_triplets_list'
-        if (functional_matrix(i(2), i(1))>0) && (functional_matrix(i(3), i(1))>0)
+        if (functional_matrix(i(2),i(1))>0) && (functional_matrix(i(3),i(1))>0)
             functional_triplets(row_index,:) = i'; % Write to row of output matrix indicated by row_index.
             row_index = row_index+1;
         end

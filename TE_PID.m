@@ -66,16 +66,16 @@ function TE_PID(output_filename, input_data, delay, triplet_list, time_resolutio
         % Check if optional triplet list is given.
         if nargin==3 || isempty(triplet_list)
             % Generate list of all possible triplets.
-            length_vector = 1:size(input_data,2);
+            neuron_list = 1:size(input_data,2);
             % Remove inactive neurons.
-            for i = length_vector
+            for i = neuron_list
                 if size(unique(input_data(:,i)),1) == 1
                     fprintf(output_file, 'Neuron %1u has zero entropy. Discarding all triplets containing neuron %1u.\n', i, i);
-                    length_vector(length_vector==i) = 0;
+                    neuron_list(neuron_list==i) = 0;
                 end
             end
-            length_vector(length_vector==0) = [];
-            target_1 = nchoosek(length_vector,3);
+            neuron_list(neuron_list==0) = [];
+            target_1 = nchoosek(neuron_list,3);
             target_2 = circshift(target_1,1,2);
             target_3 = circshift(target_1,-1,2);
             triplet_list = [target_1; target_2; target_3];
@@ -88,20 +88,20 @@ function TE_PID(output_filename, input_data, delay, triplet_list, time_resolutio
             elseif any(unique(triplet_list) > size(input_data,2))
                 error('Neuron indices in given triplet list must not be greater than total number of neurons in input dataset.')
             else
-                length_vector = (unique(triplet_list))';
-                for i = length_vector
+                neuron_list = (unique(triplet_list))';
+                for i = neuron_list
                     if size(unique(input_data(:,i)),1) == 1
                         fprintf(output_file, 'Neuron %1u has zero entropy. Discarding all triplets containing neuron %1u.\n', i, i);
                         triplet_list(sum(triplet_list==i,2)>0,:) = [];
-                        length_vector(length_vector==i) = 0;
+                        neuron_list(neuron_list==i) = 0;
                     end
                 end
-                length_vector(length_vector==0) = [];
+                neuron_list(neuron_list==0) = [];
             end
         end
         % Calculate and record entropy of target neuron separately.
         fprintf(output_file, 'Target, Entropy\n');
-        for i = length_vector
+        for i = neuron_list
             entropy = 0;
             target_future = input_data(:,i);
             target_future(1:delay) = [];
@@ -124,7 +124,7 @@ function TE_PID(output_filename, input_data, delay, triplet_list, time_resolutio
             single_TEs(row_index,3) = TE(input_data(:,i(1)), input_data(:,i(2)), delay);
             row_index = row_index + 1;
         end
-        clear length_vector targeted_pairs row_index
+        clear neuron_list targeted_pairs row_index
         % Import all neuron triplets from triplet_list.
         for i = triplet_list'
             redundancy = I_min_TE(input_data(:,i(1)), input_data(:,i(2)), input_data(:,i(3)), delay);
