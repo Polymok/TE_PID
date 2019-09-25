@@ -39,6 +39,8 @@
 % time-series are given, N*(N-1)*(N-2)/2 triplets are returned.
 
 function TE_PID(output_filename, input_data, delay, triplet_list, time_resolution)
+
+    %% Check inputs.
     if ~isscalar(delay)
         error('Input time-delay must be a scalar.')
     elseif (round(delay)~=delay) || (delay<1)
@@ -46,7 +48,8 @@ function TE_PID(output_filename, input_data, delay, triplet_list, time_resolutio
     elseif ~isstring(output_filename) && ~ischar(output_filename)
         error('Output filename must be entered as a string or char.')
     end
-    % Case: input is a matrix containing a single trial.
+    
+    %% Case: input is a matrix containing a single trial.
     if ismatrix(input_data)
         % Check if a single time-series is contained in a column.
         if size(input_data,1) < size(input_data,2)
@@ -56,13 +59,17 @@ function TE_PID(output_filename, input_data, delay, triplet_list, time_resolutio
             end
             clear str
         end
-        % Check if optional time resolution is given.
+        
+        %% Optionally, time bin at given resolution.
         if nargin==5
             input_data = timebin(input_data, time_resolution);
             clear time_resolution
         end
-        % Write output to separate file.
+        
+        %% Write output to separate file.
         output_file = fopen(output_filename, 'a');
+        
+        %% Calculate neuron entropies, and remove inactive neurons from subsequent PID calculations.
         nNeuron = size(input_data,2);
         % If optional triplet list is given, extract list of unique neuron indices.
         if (nargin > 3) && ~isempty(triplet_list)
@@ -99,7 +106,8 @@ function TE_PID(output_filename, input_data, delay, triplet_list, time_resolutio
         end
         neuron_list(neuron_list==0) = [];
         clear prob entropy
-        % If optional triplet list is not given, create list of all active neuron triplets.
+        
+        %% If optional triplet list is not given, create list of all active neuron triplets.
         if nargin==3 || isempty(triplet_list)
             target_1 = nchoosek(neuron_list,3);
             target_2 = circshift(target_1,1,2);
@@ -107,6 +115,8 @@ function TE_PID(output_filename, input_data, delay, triplet_list, time_resolutio
             triplet_list = [target_1; target_2; target_3];
             clear target_1 target_2 target_3;
         end
+        
+        %% Calculate and record PID values.
         fprintf(output_file, 'Target, Source1, Source2, Synergy, Redundancy, Unique1, Unique2\n');
         % Calculate and store transfer entropies from single source to single target.
         targeted_pairs = unique([triplet_list(:,1:2); triplet_list(:,1) triplet_list(:,3)], 'rows');
@@ -118,7 +128,7 @@ function TE_PID(output_filename, input_data, delay, triplet_list, time_resolutio
             row_index = row_index + 1;
         end
         clear neuron_list targeted_pairs row_index
-        % Import all neuron triplets from triplet_list.
+        % Import all neuron triplets from triplet_list, and calculate PID values.
         for i = triplet_list'
             redundancy = I_min_TE(input_data(:,i(1)), input_data(:,i(2)), input_data(:,i(3)), delay);
             TE1 = single_TEs(sum(single_TEs(:,1:2)==[i(1) i(2)],2)==2,3);
@@ -131,7 +141,9 @@ function TE_PID(output_filename, input_data, delay, triplet_list, time_resolutio
             fprintf(output_file, '%1u, %1u, %1u, %.6g, %.6g, %.6g, %.6g\n', output_data);
         end
         fclose(output_file);
-    % Case: input is a cell containing multiple trials.
+        
+    %% Case: input is a cell containing multiple trials.
+    % Extract each cell element as a matrix, and feed back into TE_PID.m.
     elseif iscell(input_data)
         if (size(input_data,1) ~= 1) && (size(input_data,2) ~= 1)
             error('Input cell must be one-dimensional.')
@@ -173,4 +185,5 @@ function TE_PID(output_filename, input_data, delay, triplet_list, time_resolutio
     else
         error('Input dataset must be a cell or a matrix.')
     end
+    
 end
