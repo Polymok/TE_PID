@@ -65,35 +65,57 @@ In the case of `and`, small values obtain for *unique1* and *unique2*, contrary 
 >> load synaptic_matrix.mat  
 >> time_resolution = 20;  
 >> time_delay = 1;  
->> TE_PID('output.csv', spiketrain, 1, [], 20);  
+>> spiketrain = timebin(spiketrain, time_resolution);  
+>> TE_PID('output.csv', spiketrain, time_delay);  
 ...  
->> all_PID = readmatrix('output.csv');  
->> [func_list, func_mat, deltaw] = functional(timebin(spiketrain, time_resolution), time_delay);  
->> [recr_list, recr_mat] = recruitment(func_mat, synaptic_matrix);  
->> func_PID = PID_extract(all_PID, func_list);  
->> recr_PID = PID_extract(all_PID, recr_list);
->> fig = PID_plot(all_PID, func_PID, recr_PID);  
+>> all_PID = readmatrix('output.csv', 'Range', 503);  
+>> entropies = readmatrix('output.csv', 'Range', '2:501')
+>> [functional_list, functional_matrix, delta_w, TE_matrix] = functional(spiketrain, time_delay);  
+>> [recruit_list, recruit_matrix] = recruitment(functional_matrix, synaptic_matrix);  
+>> functional_PID = PID_extract(all_PID, functional_list);  
+>> recruit_PID = PID_extract(all_PID, recruit_list);  
+>> corr_funcional_synaptic = compare_matrix(TE_matrix, synaptic_matrix)  
+>> [corr_source_out, corr_target_in] = degree_synergy(functional_PID, functional_matrix, entropies, functional_list)
+>> fig = PID_plot(all_PID, functional_PID, recruit_PID);  
 ```
 
 #### Outputs:
 
 ##### Folder:
 
-`output.csv`: record of inactive neuron indices, entropy of all active neurons, and transfer PID values for all active neuron triplets.
+`output.csv`: entropy of all neurons, and transfer PID values for all active neuron triplets.
 
 ##### Workspace:
 
+`time_resolution`: scalar at which to time-bin input time-series. In units of time-steps.
+
+`time_delay`: scalar at which to stagger future time-series form past time-series. In units of time-steps after time-binning.
+
 `all_PID`: 7-column matrix of transfer PID values for all active neuron triplets.
 
-`func_list`: 3-column matrix of neuron indices forming a functional triplet where transfer entropies from source neurons in the 2nd and 3rd columns to the target neuron in the 1st column are both greater than zero. Note that this is a subset of `all_PID(:,1:3)`.
+`entropies`: 2-column matrix of neuron index and neuron entropy.
 
-`func_mat`: *m*x*m* matrix of functional weights between all *m* neurons. Bidirectional connections occurs only if transfer entropy in both directions are equal for a given neuron pair.
+`functional_list`: 3-column matrix of neuron indices forming a functional fan-in triplet where transfer entropies from source neurons in the 2nd and 3rd columns to the target neuron in the 1st column are both greater than zero. Note that this is a subset of `all_PID(:,1:3)`.
 
-`deltaw`: vector of differences between functional weights *w(ij)* and *w(ji)* for non-zero transfer entropies.
+`functional_matrix`: *m*x*m* matrix of functional weights between all *m* neurons. Bidirectional connections occurs only if transfer entropy in both directions are equal for a given neuron pair.
 
-`recr_list`: 3-column matrix of neuron indices forming a recruitment triplet. Note that this is a subset of both `all_PID(:,1:3` and `func_list`.
+`delta_w`: vector of differences between functional weights *w(ij)* and *w(ji)* for non-zero transfer entropies.
 
-`recr_mat`: *m*x*m* matrix of recruitment weights between all *m* neurons. Note that this is a subset of `func_mat`.
+`TE_matrix`: *m*x*m* matrix of functional weights between all *m* neurons, without setting to zero the smaller of *w(ij)* and *w(ji)* for all neuron pairs.
+
+`recruit_list`: 3-column matrix of neuron indices forming a recruitment fan-in triplet. Note that this is a subset of both `all_PID(:,1:3` and `functional_list`.
+
+`recruit_mat`: *m*x*m* matrix of recruitment weights between all *m* neurons. Note that this is a subset of `functional_mat`.
+
+`functional_PID`: subset of `all_PID` limited to functional fan-in triplets.
+
+`recruit_PID`: subset of `all_PID` limited to recruitment fan-in triplets.
+
+`corr_functional_synaptic`: correlation coefficient between functional weights and corresponding synaptic weights.
+
+`corr_source_out`: correlation coefficient between synergy and out-degree of source neurons.
+
+`corr_target_in`: correlation coefficient between synergy and in-degree of target neuron.
 
 `fig`: figure object plotting histograms of synergy, redundancy, and unique PID values for all triplets, functional triplets, and recruitment triplets. Use `findobj.m` to adjust axes or histogram properties.
 
@@ -101,8 +123,8 @@ In the case of `and`, small values obtain for *unique1* and *unique2*, contrary 
 
 ### `TE_PID.m`
 
-`TE_PID.m`(*output_filename*, *time-series*, *time-delay*, *triplet_list*, *time_resolution*)  
-Given input matrices and a scalar time-delay, calculate PID terms for transfer entropy.
+`TE_PID`(*output_filename*, *time-series*, *time-delay*, *triplet_list*, *time_resolution*)  
+Given input time-series matrices and a scalar time-delay, calculate PID terms for transfer entropy.
 
 For *N* neurons, the number of possible neuron triplets is *N\*(N-1)\*(N-2)/2*. Consequently for large *N*, `TE_PID.m` is computationally intensive if *triplet_list* is not given.
 
