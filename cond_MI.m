@@ -8,6 +8,7 @@
 % This function may take vector-valued time-series.
 
 function [condMI] = cond_MI(X, Y, Z)
+
     %% Check inputs.
     % Ensure input time-series are column vectors.
     if size(X,1) < size(X,2)
@@ -32,6 +33,7 @@ function [condMI] = cond_MI(X, Y, Z)
     if (size(X,1)~=size(Y,1)) || (size(X,1)~=size(Z,1)) || (size(Y,1)~=size(Z,1))
         error('Input vectors are not of equal length.')
     end
+    
     %% Calculate condition mutual information.
     condMI = 0; % Initialize output.
     % Sum over all unique values of X, Y, and Z.
@@ -55,5 +57,6 @@ function [condMI] = cond_MI(X, Y, Z)
                 end
             end
         end
-    end       
+    end   
+    
 end
