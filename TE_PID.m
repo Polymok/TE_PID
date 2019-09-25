@@ -63,41 +63,21 @@ function TE_PID(output_filename, input_data, delay, triplet_list, time_resolutio
         end
         % Write output to separate file.
         output_file = fopen(output_filename, 'a');
-        % Check if optional triplet list is given.
-        if nargin==3 || isempty(triplet_list)
-            % Generate list of all possible triplets.
-            neuron_list = 1:size(input_data,2);
-            % Remove inactive neurons.
-            for i = neuron_list
-                if size(unique(input_data(:,i)),1) == 1
-                    fprintf(output_file, 'Neuron %1u has zero entropy. Discarding all triplets containing neuron %1u.\n', i, i);
-                    neuron_list(neuron_list==i) = 0;
-                end
-            end
-            neuron_list(neuron_list==0) = [];
-            target_1 = nchoosek(neuron_list,3);
-            target_2 = circshift(target_1,1,2);
-            target_3 = circshift(target_1,-1,2);
-            triplet_list = [target_1; target_2; target_3];
-            clear target_1 target_2 target_3;
-        else
+        nNeuron = size(input_data,2);
+        % If optional triplet list is given, extract list of unique neuron indices.
+        if (nargin > 3) && ~isempty(triplet_list)
             if ~ismatrix(triplet_list)
                 error('List of neuron triplets must be a matrix.')
             elseif size(triplet_list,2) ~= 3
                 error('List of neuron triplets must have 3 columns.')
-            elseif any(unique(triplet_list) > size(input_data,2))
+            elseif any(unique(triplet_list) > nNeuron)
                 error('Neuron indices in given triplet list must not be greater than total number of neurons in input dataset.')
             else
                 neuron_list = (unique(triplet_list))';
-                for i = neuron_list
-                    if size(unique(input_data(:,i)),1) == 1
-                        fprintf(output_file, 'Neuron %1u has zero entropy. Discarding all triplets containing neuron %1u.\n', i, i);
-                        triplet_list(sum(triplet_list==i,2)>0,:) = [];
-                        neuron_list(neuron_list==i) = 0;
-                    end
-                end
-                neuron_list(neuron_list==0) = [];
             end
+        % If optional triplet list is not given, create list of all neuron indices.
+        else
+            neuron_list = 1:nNeuron;
         end
         % Calculate and record entropy of target neuron separately.
         fprintf(output_file, 'Target, Entropy\n');
@@ -105,15 +85,28 @@ function TE_PID(output_filename, input_data, delay, triplet_list, time_resolutio
             entropy = 0;
             target_future = input_data(:,i);
             target_future(1:delay) = [];
-                for j = [0,1] % Binary time-series only.
+                for j = unique(target_future)
                     prob = sum(target_future==j)/size(target_future,1);
                     if prob ~= 0
                         entropy = entropy - prob * log2(prob);
                     end
                 end
             fprintf(output_file, '%1u, %.6g\n', i, entropy);
+            % Remove inactive neurons.
+            if entropy == 0
+                neuron_list(i) = 0;
+            end
         end
+        neuron_list(neuron_list==0) = [];
         clear prob entropy
+        % If optional triplet list is not given, create list of all active neuron triplets.
+        if nargin==3 || isempty(triplet_list)
+            target_1 = nchoosek(neuron_list,3);
+            target_2 = circshift(target_1,1,2);
+            target_3 = circshift(target_1,-1,2);
+            triplet_list = [target_1; target_2; target_3];
+            clear target_1 target_2 target_3;
+        end
         fprintf(output_file, 'Target, Source1, Source2, Synergy, Redundancy, Unique1, Unique2\n');
         % Calculate and store transfer entropies from single source to single target.
         targeted_pairs = unique([triplet_list(:,1:2); triplet_list(:,1) triplet_list(:,3)], 'rows');
