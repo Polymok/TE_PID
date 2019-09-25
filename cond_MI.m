@@ -29,7 +29,6 @@ function [condMI] = cond_MI(X, Y, Z)
             Z = Z';
         end
     end
-    % Check if inputs are the same length.
     if (size(X,1)~=size(Y,1)) || (size(X,1)~=size(Z,1)) || (size(Y,1)~=size(Z,1))
         error('Input vectors are not of equal length.')
     end
