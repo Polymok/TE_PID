@@ -1,3 +1,13 @@
+% Given a weight matrix and a list of PID values, return correlation
+% between source neuron out-degree and synergy, as well as target in-degree
+% and synergy. A list of all neuron in and out degrees may also be
+% returned.
+%
+% Optionally, input a list of neuron entropies over which to normalize
+% synergy values; input a list of neuron triplets over which to calculate
+% correlation; and a threshold between 0 and 1. E.g. if a threshold of 0.25
+% is given, set the bottom 25% of weights in the weight matrix to zero.
+%
 % Input weight matrices must have presynaptic neurons represented as rows,
 % and postsynaptic neurons as columns.
 
@@ -30,7 +40,7 @@ function [corr_source_out, corr_target_in, indegree, outdegree] = degree_synergy
         end
     end
     
-    %% Create binary adjacency matrix from weight matrix.
+    %% Create binary adjacency matrix from weight matrix, then calculate in and out degrees.
     weight_matrix(weight_matrix~=0) = 1; % Binarize adjacency matrix.
     indegree = sum(weight_matrix,1)'; % Returns a 1-dimensional list of neuron in-degrees, the indices of which correspond to indices of the weight matrix.
     outdegree = sum(weight_matrix,2); % Similarly, returns neuron out-degrees.
