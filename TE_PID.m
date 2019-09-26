@@ -99,13 +99,29 @@ function TE_PID(output_filename, input_timeseries, delay, triplet_list, resoluti
                 end
             end
             fprintf(output_file, '%1u, %.6g\n', i, entropy);
-            % Remove inactive neurons.
+            % Mark inactive neurons with index zero.
             if entropy == 0
                 neuron_list(i) = 0;
             end
         end
+        % Remove marked inactive neurons.
         neuron_list(neuron_list==0) = [];
         clear prob entropy
+        
+        %% Calculate and store single-source transfer entropies.
+        % Generate list of all directed neuron pairs.
+        pairs_1 = nchoosek(neuron_list,2);
+        pairs_2 = circshift(pairs_1,1,2);
+        targeted_pairs = [pairs_1; pairs_2];
+        clear pairs_1 pairs_2
+        single_TEs = zeros(size(targeted_pairs,1),3);
+        row_index = 1;
+        for i = targeted_pairs'
+            single_TEs(row_index,1:2) = i';
+            single_TEs(row_index,3) = TE(input_timeseries(:,i(1)), input_timeseries(:,i(2)), delay);
+            row_index = row_index + 1;
+        end
+        clear neuron_list targeted_pairs row_index
         
         %% If optional triplet list is not given, create list of all active neuron triplets.
         if nargin==3 || isempty(triplet_list)
@@ -116,19 +132,8 @@ function TE_PID(output_filename, input_timeseries, delay, triplet_list, resoluti
             clear target_1 target_2 target_3;
         end
         
-        %% Calculate and record PID values.
+        %% Calculate and write PID values to output file.
         fprintf(output_file, 'Target, Source1, Source2, Synergy, Redundancy, Unique1, Unique2\n');
-        % Calculate and store transfer entropies from single source to single target.
-        targeted_pairs = unique([triplet_list(:,1:2); triplet_list(:,1) triplet_list(:,3)], 'rows');
-        single_TEs = zeros(size(targeted_pairs,1),3);
-        row_index = 1;
-        for i = targeted_pairs'
-            single_TEs(row_index,1:2) = i';
-            single_TEs(row_index,3) = TE(input_timeseries(:,i(1)), input_timeseries(:,i(2)), delay);
-            row_index = row_index + 1;
-        end
-        clear neuron_list targeted_pairs row_index
-        % Import all neuron triplets from triplet_list, and calculate PID values.
         for i = triplet_list'
             redundancy = I_min_TE(input_timeseries(:,i(1)), input_timeseries(:,i(2)), input_timeseries(:,i(3)), delay); % Calculate redundacy using minimum information first.
             TE1 = single_TEs(sum(single_TEs(:,1:2)==[i(1) i(2)],2)==2,3); % Extract single-source transfer entropy values from above matrix.
