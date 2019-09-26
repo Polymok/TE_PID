@@ -130,15 +130,15 @@ function TE_PID(output_filename, input_timeseries, delay, triplet_list, resoluti
         clear neuron_list targeted_pairs row_index
         % Import all neuron triplets from triplet_list, and calculate PID values.
         for i = triplet_list'
-            redundancy = I_min_TE(input_timeseries(:,i(1)), input_timeseries(:,i(2)), input_timeseries(:,i(3)), delay);
-            TE1 = single_TEs(sum(single_TEs(:,1:2)==[i(1) i(2)],2)==2,3);
+            redundancy = I_min_TE(input_timeseries(:,i(1)), input_timeseries(:,i(2)), input_timeseries(:,i(3)), delay); % Calculate redundacy using minimum information first.
+            TE1 = single_TEs(sum(single_TEs(:,1:2)==[i(1) i(2)],2)==2,3); % Extract single-source transfer entropy values from above matrix.
             TE2 = single_TEs(sum(single_TEs(:,1:2)==[i(1) i(3)],2)==2,3);
-            TE12 = TE(input_timeseries(:,i(1)), [input_timeseries(:,i(2)) input_timeseries(:,i(3))], delay);
-            unique1 = TE1 - redundancy;
+            TE12 = TE(input_timeseries(:,i(1)), [input_timeseries(:,i(2)) input_timeseries(:,i(3))], delay); % Calculate 2-source transfer entropy.
+            unique1 = TE1 - redundancy; % Derive unique PID values.
             unique2 = TE2 - redundancy;
-            synergy =  TE12 - redundancy - unique1 - unique2;
+            synergy =  TE12 - redundancy - unique1 - unique2; % Derive synergy value.
             output_data = [i; synergy; redundancy; unique1; unique2];
-            fprintf(output_file, '%1u, %1u, %1u, %.6g, %.6g, %.6g, %.6g\n', output_data);
+            fprintf(output_file, '%1u, %1u, %1u, %.9g, %.9g, %.9g, %.9g\n', output_data); % Print neuron indices as integers, and PID terms as floats accurate to 9 decimal places.
         end
         fclose(output_file);
         
