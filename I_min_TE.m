@@ -9,7 +9,7 @@
 %
 % Output is a scalar in units of bits.
 %
-% This function can only take discrete, binary time-series.
+% This function can only take discrete time-series.
 
 function [min_info] = I_min_TE(target, source1, source2, delay)
 
@@ -34,7 +34,7 @@ function [min_info] = I_min_TE(target, source1, source2, delay)
     
     %% Calculate minimum information.
     min_info = 0;
-    for i = unique(target_future, 'rows')' % Binary time-series only.
+    for i = unique(target_future, 'rows')'
         subtractor = I_spec(target, i', delay);
         spec_info1 = I_spec(target, i', delay, source1) - subtractor;
         spec_info2 = I_spec(target, i', delay, source2) - subtractor;

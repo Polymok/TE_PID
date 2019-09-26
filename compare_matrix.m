@@ -1,8 +1,8 @@
-% Given a functional matrix and a synaptic matrix, this function returns
-% the correlation coefficient between elements with identical
-% indices in the two matrices. Only non-zero functional connections (and
-% their corresponding synaptic connections) are considered. Z-scored
-% weights are also returned in a 1-dimensional list.
+% Given a functional matrix and a synaptic matrix, return the correlation
+% coefficient between elements with identical indices in the two matrices.
+% Only non-zero functional connections (and their corresponding synaptic
+% connections) are considered. Z-scored weights are also returned in a
+% 1-dimensional list.
 %
 % The objective of writing this function is to determine whether
 % connections with high functional weight also have high synaptic weight.

@@ -4,8 +4,6 @@
 % of bits.
 %
 % This function can only take discrete time-series.
-%
-% This function may take vector-valued time-series.
 
 function [condMI] = cond_MI(X, Y, Z)
 

@@ -1,7 +1,7 @@
-% Given two time-series T, S and one integer time-delay, this function
-% returns the transfer entropy from S to T with the given time-delay
-% between T_future and T_past. Transfer entropy normalized by entropy of
-% the target time-series is also calculated.
+% Given two time-series T, S and one integer time-delay, return the
+% transfer entropy from S to T with the given time-delay between T_future
+% and T_past. Transfer entropy normalized by entropy of the target
+% time-series is also calculated.
 %
 % Output is a scalar in units of bits.
 %
@@ -10,6 +10,7 @@
 function [transfer_entropy, normed_TE] = TE(target, source, delay)
 
     %% Check inputs.
+    % Check if time-series for a single neuron are represented as a single column.
     if size(target,1) < size(target,2)
         str = input('Target input vector has a greater number of columns than rows. Each column should contain the entire time-series of a single neuron. Transpose input matrix? y/n: ','s');
         if str == 'y'
@@ -54,4 +55,5 @@ function [transfer_entropy, normed_TE] = TE(target, source, delay)
             normed_TE = transfer_entropy / target_entropy;
         end
     end
+    
 end

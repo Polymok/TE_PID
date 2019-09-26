@@ -21,7 +21,7 @@
 
 function [functional_triplets, functional_matrix, weight_diff, raw_TE_matrix] = functional(input_timeseries, delay, threshold)
 
-    %% Check input formats.
+    %% Check inputs.
     if ~ismatrix(input_timeseries)
         error('Input time-series must be a matrix.')
     elseif ~isscalar(delay)
@@ -29,8 +29,7 @@ function [functional_triplets, functional_matrix, weight_diff, raw_TE_matrix] = 
     elseif delay<1
         error('Input time-delay must be at least 1.')
     end
-    
-    %% Check if a single time-series is contained in a column.
+    % Check if a single time-series is contained in a column.
     if size(input_timeseries,1) < size(input_timeseries,2)
         str = input('Input matrix has greater number of columns than rows. Each column should contain the entire time-series of a single neuron. Transpose input matrix? y/n: ','s');
         if str == 'y'
@@ -48,7 +47,6 @@ function [functional_triplets, functional_matrix, weight_diff, raw_TE_matrix] = 
     % directional matrix. Conversely, if greater transfer entropy obtains
     % when j lags behind i, we record TE(j->i in element (j,i) of the
     % directional matrix.
-    
     functional_matrix = zeros(nNeuron, nNeuron);
     % Initialize list of all undirected active neuron pairs.
     neuron_list = 1:nNeuron;
@@ -116,7 +114,6 @@ function [functional_triplets, functional_matrix, weight_diff, raw_TE_matrix] = 
     end
     
     %% Print topological data of interest to command window.
-    
     disp(['Number of active functional neurons: ', num2str(sum(sum(functional_matrix>0)>0))]);
     disp(['Number of functional connections: ', num2str(sum(sum(functional_matrix>0)))]);
     disp(['Number of bidirectional functional connections: ', num2str(sum(sum(functional_matrix==functional_matrix'&functional_matrix>0))/2)]);
@@ -143,4 +140,5 @@ function [functional_triplets, functional_matrix, weight_diff, raw_TE_matrix] = 
         end
     end
     functional_triplets(functional_triplets(:,1)==0,:) = []; % Remove extra rows.
+    
 end
