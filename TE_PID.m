@@ -38,7 +38,7 @@
 % PID is calculated for all neuron triplets. If N simultaneously recorded
 % time-series are given, N*(N-1)*(N-2)/2 triplets are returned.
 
-function TE_PID(output_filename, input_data, delay, triplet_list, time_resolution)
+function TE_PID(output_filename, input_timeseries, delay, triplet_list, resolution)
 
     %% Check inputs.
     if ~isscalar(delay)
@@ -50,19 +50,19 @@ function TE_PID(output_filename, input_data, delay, triplet_list, time_resolutio
     end
     
     %% Case: input is a matrix containing a single trial.
-    if ismatrix(input_data)
+    if ismatrix(input_timeseries)
         % Check if a single time-series is contained in a column.
-        if size(input_data,1) < size(input_data,2)
+        if size(input_timeseries,1) < size(input_timeseries,2)
             str = input('Input matrix has greater number of columns than rows. Each column should contain the entire time-series of a single neuron. Transpose input matrix? y/n: ','s');
             if str == 'y'
-                input_data = input_data';
+                input_timeseries = input_timeseries';
             end
             clear str
         end
         
-        %% Optionally, time bin at given resolution.
+        %% Optionally, time-bin at given resolution.
         if nargin==5
-            input_data = timebin(input_data, time_resolution);
+            input_timeseries = timebin(input_timeseries, resolution);
             clear time_resolution
         end
         
@@ -70,7 +70,7 @@ function TE_PID(output_filename, input_data, delay, triplet_list, time_resolutio
         output_file = fopen(output_filename, 'a');
         
         %% Calculate neuron entropies, and remove inactive neurons from subsequent PID calculations.
-        nNeuron = size(input_data,2);
+        nNeuron = size(input_timeseries,2);
         % If optional triplet list is given, extract list of unique neuron indices.
         if (nargin > 3) && ~isempty(triplet_list)
             if ~ismatrix(triplet_list)
@@ -90,14 +90,14 @@ function TE_PID(output_filename, input_data, delay, triplet_list, time_resolutio
         fprintf(output_file, 'Target, Entropy\n');
         for i = neuron_list
             entropy = 0;
-            target_future = input_data(:,i);
+            target_future = input_timeseries(:,i);
             target_future(1:delay) = [];
-                for j = unique(target_future)
-                    prob = sum(target_future==j)/size(target_future,1);
-                    if prob ~= 0
-                        entropy = entropy - prob * log2(prob);
-                    end
+            for j = unique(target_future)
+                prob = sum(target_future==j)/size(target_future,1);
+                if prob ~= 0
+                    entropy = entropy - prob * log2(prob);
                 end
+            end
             fprintf(output_file, '%1u, %.6g\n', i, entropy);
             % Remove inactive neurons.
             if entropy == 0
@@ -124,16 +124,16 @@ function TE_PID(output_filename, input_data, delay, triplet_list, time_resolutio
         row_index = 1;
         for i = targeted_pairs'
             single_TEs(row_index,1:2) = i';
-            single_TEs(row_index,3) = TE(input_data(:,i(1)), input_data(:,i(2)), delay);
+            single_TEs(row_index,3) = TE(input_timeseries(:,i(1)), input_timeseries(:,i(2)), delay);
             row_index = row_index + 1;
         end
         clear neuron_list targeted_pairs row_index
         % Import all neuron triplets from triplet_list, and calculate PID values.
         for i = triplet_list'
-            redundancy = I_min_TE(input_data(:,i(1)), input_data(:,i(2)), input_data(:,i(3)), delay);
+            redundancy = I_min_TE(input_timeseries(:,i(1)), input_timeseries(:,i(2)), input_timeseries(:,i(3)), delay);
             TE1 = single_TEs(sum(single_TEs(:,1:2)==[i(1) i(2)],2)==2,3);
             TE2 = single_TEs(sum(single_TEs(:,1:2)==[i(1) i(3)],2)==2,3);
-            TE12 = TE(input_data(:,i(1)), [input_data(:,i(2)) input_data(:,i(3))], delay);
+            TE12 = TE(input_timeseries(:,i(1)), [input_timeseries(:,i(2)) input_timeseries(:,i(3))], delay);
             unique1 = TE1 - redundancy;
             unique2 = TE2 - redundancy;
             synergy =  TE12 - redundancy - unique1 - unique2;
@@ -144,18 +144,18 @@ function TE_PID(output_filename, input_data, delay, triplet_list, time_resolutio
         
     %% Case: input is a cell containing multiple trials.
     % Extract each cell element as a matrix, and feed back into TE_PID.m.
-    elseif iscell(input_data)
-        if (size(input_data,1) ~= 1) && (size(input_data,2) ~= 1)
+    elseif iscell(input_timeseries)
+        if (size(input_timeseries,1) ~= 1) && (size(input_timeseries,2) ~= 1)
             error('Input cell must be one-dimensional.')
-        elseif size(input_data,1) > size(input_data,2)
-            input_data = input_data';
+        elseif size(input_timeseries,1) > size(input_timeseries,2)
+            input_timeseries = input_timeseries';
         end
-        for trial = 1:size(input_data,2)
-            input_matrix = input_data{1, trial};
+        for trial = 1:size(input_timeseries,2)
+            input_matrix = input_timeseries{1, trial};
             % Check if optional triplet list is given.
             if nargin == 3 || isempty(triplet_list)
                 if nargin==5
-                    TE_PID(output_filename, input_matrix, delay, [], time_resolution);
+                    TE_PID(output_filename, input_matrix, delay, [], resolution);
                 else
                     TE_PID(output_filename, input_matrix, delay);
                 end
@@ -163,7 +163,7 @@ function TE_PID(output_filename, input_data, delay, triplet_list, time_resolutio
                 % Check if given triplet list is a matrix or a cell.
                 if ismatrix(triplet_list)
                     if nargin==5
-                        TE_PID(output_filename, input_matrix, delay, triplet_list, time_resolution);
+                        TE_PID(output_filename, input_matrix, delay, triplet_list, resolution);
                     else
                         TE_PID(output_filename, input_matrix, delay, triplet_list);
                     end
@@ -175,7 +175,7 @@ function TE_PID(output_filename, input_data, delay, triplet_list, time_resolutio
                     end
                     triplet_matrix = triplet_list{1, trial};
                     if nargin==5
-                        TE_PID(output_filename, input_matrix, delay, triplet_matrix, time_resolution);
+                        TE_PID(output_filename, input_matrix, delay, triplet_matrix, resolution);
                     else
                         TE_PID(output_filename, input_matrix, delay, triplet_matrix);
                     end
