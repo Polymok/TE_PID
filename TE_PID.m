@@ -10,25 +10,25 @@
 % A positive integer time-delay is required to compute transfer entropy
 % values.
 %
-% Optionally, you may input a list of neuron triplet indices if you wish to
-% only calculate PID for a subset of total possible triplets. This list
-% must take the form of an nx3 matrix, where the first column represents
-% the target neuron index. If the input dataset is a cell of matrices, the
-% neuron triplet list must also be a cell of identical dimensions, each
-% containing a nx3 matrix. If this optional argument is not given, this
-% function will calculate PID for all possible triplets.
+% Optionally, input a list of neuron triplet indices to only calculate PID
+% for a subset of total possible triplets. This list must take the form of
+% an nx3 matrix, where the first column represents the target neuron index.
+% If the input dataset is a cell of matrices, the neuron triplet list must
+% also be a cell of identical dimensions, each containing a nx3 matrix. If
+% this optional argument is not given, this function will calculate PID for
+% all possible triplets.
 %
-% Optionally, you may enter a positive integer time-resolution at which to
-% time bin input data. Note that if you time bin, the time-delay used to
-% calculate transfer entropy will apply to the time binned time-series.
+% Optionally, enter a positive integer time-resolution at which to time bin
+% input data. Note that the time-delay used to calculate transfer entropy
+% will apply to the time-series after time binning.
 %
-% This function writes to output file a matrix of unique, synergistic, and
+% This function writes to output file a list of unique, synergistic, and
 % redundant partial information terms of transfer entropy between all
-% possible neuron triads. The redundant partial information is taken to be
-% equal to the minimum information function as defined by Williams and
+% possible neuron triplets. The redundant partial information is taken to
+% be equal to the minimum information function as defined by Williams and
 % Beer, 2010, modified in Timme et al., 2016.
 %
-% In each output matrix, the columns indicate in increasing order:
+% The columns of the output file indicate in increasing order:
 % target | source1 | source2 | synergy | redundancy | unique1 | unique2
 %
 % Entropy for each neuron is also calculated and recorded using the
@@ -36,7 +36,7 @@
 % time-delay given.
 %
 % PID is calculated for all neuron triplets. If N simultaneously recorded
-% time-series are given, N*(N-1)*(N-2)/2 triplets are returned.
+% time-series are given, N*(N-1)*(N-2)/2 possible triplets are returned.
 
 function TE_PID(output_filename, input_timeseries, delay, triplet_list, resolution)
 
@@ -66,7 +66,7 @@ function TE_PID(output_filename, input_timeseries, delay, triplet_list, resoluti
             clear time_resolution
         end
         
-        %% Write output to separate file.
+        %% Write outputs to separate file.
         output_file = fopen(output_filename, 'a');
         
         %% Calculate neuron entropies, and remove inactive neurons from subsequent PID calculations.
@@ -92,8 +92,8 @@ function TE_PID(output_filename, input_timeseries, delay, triplet_list, resoluti
             entropy = 0;
             target_future = input_timeseries(:,i);
             target_future(1:delay) = [];
-            for j = unique(target_future)
-                prob = sum(target_future==j)/size(target_future,1);
+            for j = unique(target_future)'
+                prob = sum(target_future==j')/size(target_future,1);
                 if prob ~= 0
                     entropy = entropy - prob * log2(prob);
                 end
