@@ -66,16 +66,17 @@ In the case of `and`, small values obtain for *unique1* and *unique2*, contrary 
 >> time_resolution = 20;  
 >> time_delay = 1;  
 >> spiketrain = timebin(spiketrain, time_resolution);  
+>> nNeuron = size(spiketrain,2);  % number of neurons  
 >> TE_PID('output.csv', spiketrain, time_delay);  
 ...  
->> all_PID = readmatrix('output.csv', 'Range', 503);  
->> entropies = readmatrix('output.csv', 'Range', '2:501')
+>> all_PID = readmatrix('output.csv', 'Range', nNeuron+3);  
+>> entropies = readmatrix('output.csv', 'Range', '2:(nNeuron+1)');  
 >> [functional_list, functional_matrix, delta_w, TE_matrix] = functional(spiketrain, time_delay);  
 >> [recruit_list, recruit_matrix] = recruitment(functional_matrix, synaptic_matrix);  
 >> functional_PID = PID_extract(all_PID, functional_list);  
 >> recruit_PID = PID_extract(all_PID, recruit_list);  
->> corr_funcional_synaptic = compare_matrix(TE_matrix, synaptic_matrix)  
->> [corr_source_out, corr_target_in] = degree_synergy(functional_PID, functional_matrix, entropies, functional_list)
+>> corr_funcional_synaptic = compare_matrix(TE_matrix, synaptic_matrix);  
+>> [corr_source_out, corr_target_in] = degree_synergy(functional_PID, functional_matrix, entropies, functional_list);  
 >> fig = PID_plot(all_PID, functional_PID, recruit_PID);  
 ```
 
@@ -90,6 +91,8 @@ In the case of `and`, small values obtain for *unique1* and *unique2*, contrary 
 `time_resolution`: scalar at which to time-bin input time-series. In units of time-steps.
 
 `time_delay`: scalar at which to stagger future time-series form past time-series. In units of time-steps after time-binning.
+
+`nNeuron`: scalar. Number of neurons, i.e. *m*.
 
 `all_PID`: 7-column matrix of transfer PID values for all active neuron triplets.
 
