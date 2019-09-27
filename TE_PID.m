@@ -41,7 +41,9 @@
 function TE_PID(output_filename, input_timeseries, delay, triplet_list, resolution)
 
     %% Check inputs.
-    if ~isscalar(delay)
+    if nargin < 3
+        error('At least 3 inputs required.')
+    elseif ~isscalar(delay)
         error('Input time-delay must be a scalar.')
     elseif (round(delay)~=delay) || (delay<1)
         error('Input time-delay must be a positive integer.')

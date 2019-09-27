@@ -14,7 +14,9 @@
 function [min_info] = I_min_TE(target, source1, source2, delay)
 
     %% Check inputs.
-    if (~isvector(target)) || (~isvector(source1)) || (~isvector(source2))
+    if nargin < 4
+        error('4 inputs required.')
+    elseif (~isvector(target)) || (~isvector(source1)) || (~isvector(source2))
         error('Inputs are not vectors.')
     elseif (length(target)~=length(source1)) || (length(target)~=length(source2))
         error('Input vectors are not of equal length.')

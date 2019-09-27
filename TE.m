@@ -11,6 +11,9 @@ function [transfer_entropy, normed_TE] = TE(target, source, delay)
 
     %% Check inputs.
     % Check if time-series for a single neuron are represented as a single column.
+    if nargin < 3
+        error('3 inputs required.')
+    end
     if size(target,1) < size(target,2)
         str = input('Target input vector has a greater number of columns than rows. Each column should contain the entire time-series of a single neuron. Transpose input matrix? y/n: ','s');
         if str == 'y'
