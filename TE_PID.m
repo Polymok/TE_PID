@@ -127,11 +127,11 @@ function TE_PID(output_filename, input_timeseries, delay, triplet_list, resoluti
         
         %% If optional triplet list is not given, create list of all active neuron triplets.
         if nargin==3 || isempty(triplet_list)
-            target_1 = nchoosek(neuron_list,3);
-            target_2 = circshift(target_1,1,2);
-            target_3 = circshift(target_1,-1,2);
-            triplet_list = [target_1; target_2; target_3];
-            clear target_1 target_2 target_3;
+            triplets_1 = nchoosek(neuron_list,3);
+            triplets_2 = circshift(triplets_1,1,2);
+            triplets_3 = circshift(triplets_1,-1,2);
+            triplet_list = [triplets_1; triplets_2; triplets_3];
+            clear triplets_1 triplets_2 triplets_3;
         end
         
         %% Calculate and write PID values to output file.
