@@ -2,8 +2,10 @@
 
 Compute partial information decomposition (PID) on transfer entropy for an input matrix of time-series for a single trial, or an input cell containing multiple matrices corresponding to multiple trials. The redundancy partial information term is given by the minimum information function described by Timme et al., 2016.
 
+# Table of Contents
 <!--ts-->
    * [Transfer Entropy Partial Information Decomposition](#transfer-entropy-partial-information-decomposition)
+   * [Table of Contents](#table-of-contents)
    * [Prerequisites](#prerequisites)
    * [Usage](#usage)
       * [Examples](#examples)
@@ -14,16 +16,21 @@ Compute partial information decomposition (PID) on transfer entropy for an input
             * [Folder](#folder)
             * [Workspace](#workspace)
    * [Functions](#functions)
+      * [Call structure](#call-structure)
       * [TE_PID.m](#te_pidm)
          * [Parameters](#parameters)
          * [Outputs](#outputs-1)
-         * [In-script variables](#in-script-variables)
-      * [Call structure](#call-structure)
+         * [Script variables](#script-variables)
+      * [TE.m](#tem)
+         * [Parameters](#parameters-1)
+         * [Outputs](#outputs-2)
+         * [Script variables](#script-variables-1)
+      * [I_min_TE.m](#i_min_tem)
    * [Bugs](#bugs)
    * [References](#references)
    * [Authors](#authors)
 
-<!-- Added by: mofei, at: Fri Sep 27 13:07:06 CDT 2019 -->
+<!-- Added by: mofei, at: Fri Sep 27 15:38:51 CDT 2019 -->
 
 <!--te-->
 
@@ -69,7 +76,7 @@ Target, Source1, Source2, Synergy, Redundancy, Unique1, Unique2
 1, 2, 3, 0.5, 0.311278, 5.55112e-17, 5.55112e-17  
 ```
 
-In all three test variables, the first column contains the target time-series of interest. Therefore, we check the first row of the output matrix where *target_index = 1* to verify that our code returns values as expected. Note that since transfer entropy splits the target time-series into a future time-series and a past time-series, test cases have their first column shifted by one.
+In all three test variables, the first column contains the target time-series of interest. Therefore, we check the first row of the output matrix where `target_index` = 1 to verify that our code returns values as expected. Note that since transfer entropy splits the target time-series into a future time-series and a past time-series, test cases have their first column shifted by one.
 
 As expected, all transfer entropy information is found in *unique1* for the `identity` test case, *synergy* for the `xor` relation.
 
@@ -149,9 +156,19 @@ In the case of `and`, small values obtain for *unique1* and *unique2*, contrary 
 
 # Functions
 
+## Call structure
+
+| Parent function      | Child function                    |
+|----------------------|-----------------------------------|
+| `TE_PID.m`           | `I_min_TE.m` `TE.m` `timebin.m`   |
+| `I_min_TE.m`         | `I_spec.m`                        |
+| `functional.m`       | `TE.m`                            |
+| `TE.m`               | `cond_MI.m`                       |
+
 ## `TE_PID.m`
 
-`TE_PID(output_filename, time-series, time-delay, triplet_list, time_resolution)`  
+`TE_PID(output_filename, input_timeseries, delay, triplet_list, resolution)`
+
 Given input time-series matrices and a scalar time-delay, calculate PID terms for transfer entropy.
 
 For *N* neurons, the number of possible neuron triplets is *N\*(N-1)\*(N-2)/2*. Consequently for large *N*, `TE_PID.m` is computationally intensive if `triplet_list` is not given.
@@ -160,31 +177,31 @@ For *N* neurons, the number of possible neuron triplets is *N\*(N-1)\*(N-2)/2*. 
 
 `output_filename`: string or char. Recommend .csv files.
 
-`time-series`: matrix or 1-dimensional cell. Columns should contain entire time-series of a given neuron.
+`input_timeseries`: matrix or 1-dimensional cell. Columns should contain entire time-series of a given neuron.
 
-`time-delay`: positive integer scalar.
+`delay`: positive integer scalar time-delay necessary for transfer entropy.
 
-`triplet_list`: [optional] 3-column matrix of neuron indices. The first column should represent the target neuron index. If `time-series` is a cell, then `triplet_list` should either be a cell with equal dimensions—each cell element containing a triplet list—or a matrix—in which case PID calculations for all trials are restricted to triplets contained in the single matrix. If not given, PID is calculated for all possible triplets. Triplets containing neurons with zero entropy are discarded.
+`triplet_list`: optional 3-column matrix of neuron indices. The first column should represent the target neuron index. If `input_timeseries` is a cell, then `triplet_list` should either be a cell with equal dimensions—each cell element containing a triplet list—or a matrix—in which case PID calculations for all trials are restricted to triplets contained in the single matrix. If not given, PID is calculated for all possible triplets. Triplets containing neurons with zero entropy are discarded.
 
-`time_resolution`: [optional] positive integer scalar. Time bins at given *time_resolution* by partitioning input time-series. If a `1` occurs within a partition, a `1` is recorded. Otherwise, a `0` is recorded. Note that if you time bin, the `time-delay` used to calculate transfer entropy applies to the *time-series* after it has been time binned.
+`resolution`: optional positive integer scalar. Time bins at given `resolution` by partitioning input time-series. If a `1` occurs within a partition, a `1` is recorded. Otherwise, a `0` is recorded. Note that if you time bin, the `delay` used to calculate transfer entropy applies to the *time-series* after it has been time binned.
 
 ### Outputs
 
 `output_filename`: file. Recommend .csv format. 7 comma-separated columns indicating in increasing order: `target_index`, `source1_index`, `source2_index`, `synergy`, `redundancy`, `unique1`, `unique2`. Each row corresponds to a specific triplet. PID terms are given in units of bits. Entropy for each neuron is also calculated separately.
 
-### In-script variables
+### Script variables
 
-`str`: query user if neurons are represented as columns in `time-series`.
+`str`: query user if neurons are represented as columns in `input_timeseries`.
 
 `output_file`: path to output filename to facilitate `fprintf`.
 
-`nNeuron`: number of neurons given in `time-series`.
+`nNeuron`: number of neurons given in `input_timeseries`.
 
 `neuron_list`: vector of unique neuron indices. If `triplet_list` is not given, `neuron_list = 1:nNeuron`.
 
 `entropy`: Shannon entropy *p*log*p* in bits.
 
-`target_future`: future time-series of each neuron. The first *X* time-steps are truncated, where *X* = `time-delay`.
+`target_future`: future time-series of each neuron. The first *X* time-steps are truncated, where *X* = `delay`.
 
 `prob`: probability that `target_future` takes on a unique value.
 
@@ -196,7 +213,7 @@ For *N* neurons, the number of possible neuron triplets is *N\*(N-1)\*(N-2)/2*. 
 
 `single_TEs`: 3-column matrix indicating target neuron index, source neuron index, and transfer entropy in bits.
 
-`row_index`: integer scalar starting at 1 and incrementing each for-loop. Used to write data to new row of output matrix.
+`row_index`: integer scalar starting at 1 and incrementing each for-loop iteration. Used to write data to new row of output matrix.
 
 `target_1`: 3-column matrix of all possible 3-neuron index combinations. First column indicates target neuron index. Generate using MATLAB in-built function `nchoosek`.
 
@@ -222,16 +239,45 @@ For *N* neurons, the number of possible neuron triplets is *N\*(N-1)\*(N-2)/2*. 
 
 `output_data`: concatenated PID terms to be printed to output file.
 
+## `TE.m`
 
+`[transfer_entropy, normed_TE] = TE(target, source, delay)`
 
-## Call structure
+Calculate transfer entropy in bits at given delay from input source time-series to input target time-series.
 
-| Parent function      | Child function [optional]         |
-|----------------------|-----------------------------------|
-| `TE_PID.m`           | `I_min_TE.m` `TE.m` [`timebin.m`] |
-| `I_min_TE.m`         | `I_spec.m`                        |
-| `functional.m`       | `TE.m`                            |
-| `TE.m`               | `cond_MI.m`                       |
+### Parameters
+
+`target`: vector or matrix. Time-steps should be represented as rows.
+
+`source`: vector or matrix. Time-steps should be represented as rows.
+
+`delay`: positive integer scalar.
+
+### Outputs
+
+`transfer_entropy`: positive scalar. Transfer entropy from `source` to `target` in units of bits.
+
+`normed_TE`: positive scalar. `transfer_entropy` normalized by entropy of future time-series of `target`, i.e. `target` with the first *X* time-steps removed, where *X* = `delay`. Output is a ratio, thus dimensionless.
+
+### Script variables
+
+`str`: query user if neurons are represented as columns in `target` and `source`.
+
+`target_future`: future time-series of `target`. The first *X* time-steps are truncated, where *X* = `delay`.
+
+`target_past`: past time-series of `target`. The last *X* time-steps are truncated, where *X* = `delay`.
+
+`source_past`: past time-series of `source`. The last *X* time-steps are truncated, where *X* = `delay`.
+
+`target_entropy`: Shannon entropy *p*log*p* of `target_future` in bits.
+
+`prob`: probability that `target_future` takes on a unique value.
+
+## `I_min_TE.m`
+
+`[min_info] = I_min_TE(target, source1, source2, delay)`
+
+Calculate minimum information from `source1` and `source2` to `target` using transfer entropy and the given `delay`.
 
 # Bugs
 
