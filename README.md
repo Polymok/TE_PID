@@ -4,34 +4,34 @@ Compute partial information decomposition (PID) on transfer entropy for an input
 
 <!--ts-->
    * [Transfer Entropy Partial Information Decomposition](#transfer-entropy-partial-information-decomposition)
-      * [Prerequisites](#prerequisites)
-      * [Usage](#usage)
-         * [Examples](#examples)
-         * [Sample workflow](#sample-workflow)
-            * [Inputs:](#inputs)
-            * [Command window:](#command-window)
-            * [Outputs:](#outputs)
-               * [Folder:](#folder)
-               * [Workspace:](#workspace)
-      * [Functions](#functions)
-         * [TE_PID.m](#te_pidm)
-            * [Parameters:](#parameters)
-            * [Outputs:](#outputs-1)
-            * [In-script variables:](#in-script-variables)
-         * [Call structure](#call-structure)
-      * [Bugs](#bugs)
-      * [References](#references)
-      * [Authors](#authors)
+   * [Prerequisites](#prerequisites)
+   * [Usage](#usage)
+      * [Examples](#examples)
+      * [Sample workflow](#sample-workflow)
+         * [Inputs](#inputs)
+         * [Command window](#command-window)
+         * [Outputs](#outputs)
+            * [Folder](#folder)
+            * [Workspace](#workspace)
+   * [Functions](#functions)
+      * [TE_PID.m](#te_pidm)
+         * [Parameters](#parameters)
+         * [Outputs](#outputs-1)
+         * [In-script variables](#in-script-variables)
+      * [Call structure](#call-structure)
+   * [Bugs](#bugs)
+   * [References](#references)
+   * [Authors](#authors)
 
-<!-- Added by: mofei, at: Fri Sep 27 12:59:17 CDT 2019 -->
+<!-- Added by: mofei, at: Fri Sep 27 13:07:06 CDT 2019 -->
 
 <!--te-->
 
-## Prerequisites
+# Prerequisites
 
 * MATLAB: all functions found here are `.m` files.
 
-## Usage
+# Usage
 
 We identify a neuron with its time-series/spike-train. To calculate transfer entropy PID for all possible neuron triplets, call `TE_PID.m` with 3 required arguments: an output filename, a matrix or cell, and a positive integer time-delay. For an input cell containing multiple matrices for multiple trials, the input cell must be 1-dimensional. Each matrix or cell column should contain the entire time-series of a single neuron, i.e. columns should represent neurons while rows represent observations at incremental times. Optionally, supply a list of neuron triplet indices for which to calculate PID. Otherwise, PID is calculated for all possible triplets. Optionally, supply a positive integer time-resolution at which to time bin input data.
 
@@ -39,7 +39,7 @@ Outputs are written to a separate file. 7 columns indicate in increasing order: 
 
 Additionally, the entropy of each neuron is calculated and recorded to facilitate normalization of information terms by the entropy of the target neuron.
 
-### Examples
+## Examples
 
 Call `TE_PID.m` with test case matrix variables `{identity, xor, and}` stored in `test_logicgates.mat` and time-delay `1`.
 
@@ -75,15 +75,15 @@ As expected, all transfer entropy information is found in *unique1* for the `ide
 
 In the case of `and`, small values obtain for *unique1* and *unique2*, contrary to the expected zero value. This may be due to rounding error.
 
-### Sample workflow
+## Sample workflow
 
-#### Inputs:
+### Inputs
 
 `spiketrain.mat`: *n*x*m* matrix of *m* neurons, each with *n* time steps.
 
 `synaptic_matrix.mat`: *m*x*m* matrix of synaptic weights between *m* neurons.
 
-#### Command window:
+### Command window
 
 ```
 >> load spiketrain.mat  
@@ -105,13 +105,13 @@ In the case of `and`, small values obtain for *unique1* and *unique2*, contrary 
 >> fig = PID_plot(all_PID, functional_PID, recruit_PID);  
 ```
 
-#### Outputs:
+### Outputs
 
-##### Folder:
+#### Folder
 
 `output.csv`: entropy of all neurons, and transfer PID values for all active neuron triplets.
 
-##### Workspace:
+#### Workspace
 
 `time_resolution`: scalar at which to time-bin input time-series. In units of time-steps.
 
@@ -147,16 +147,16 @@ In the case of `and`, small values obtain for *unique1* and *unique2*, contrary 
 
 `fig`: figure object plotting histograms of synergy, redundancy, and unique PID values for all triplets, functional triplets, and recruitment triplets. Use `findobj` to adjust axes or histogram properties.
 
-## Functions
+# Functions
 
-### `TE_PID.m`
+## `TE_PID.m`
 
 `TE_PID(output_filename, time-series, time-delay, triplet_list, time_resolution)`  
 Given input time-series matrices and a scalar time-delay, calculate PID terms for transfer entropy.
 
 For *N* neurons, the number of possible neuron triplets is *N\*(N-1)\*(N-2)/2*. Consequently for large *N*, `TE_PID.m` is computationally intensive if `triplet_list` is not given.
 
-#### Parameters:
+### Parameters
 
 `output_filename`: string or char. Recommend .csv files.
 
@@ -168,11 +168,11 @@ For *N* neurons, the number of possible neuron triplets is *N\*(N-1)\*(N-2)/2*. 
 
 `time_resolution`: [optional] positive integer scalar. Time bins at given *time_resolution* by partitioning input time-series. If a `1` occurs within a partition, a `1` is recorded. Otherwise, a `0` is recorded. Note that if you time bin, the `time-delay` used to calculate transfer entropy applies to the *time-series* after it has been time binned.
 
-#### Outputs:
+### Outputs
 
 `output_filename`: file. Recommend .csv format. 7 comma-separated columns indicating in increasing order: `target_index`, `source1_index`, `source2_index`, `synergy`, `redundancy`, `unique1`, `unique2`. Each row corresponds to a specific triplet. PID terms are given in units of bits. Entropy for each neuron is also calculated separately.
 
-#### In-script variables:
+### In-script variables
 
 `str`: query user if neurons are represented as columns in `time-series`.
 
@@ -224,7 +224,7 @@ For *N* neurons, the number of possible neuron triplets is *N\*(N-1)\*(N-2)/2*. 
 
 
 
-### Call structure
+## Call structure
 
 | Parent function      | Child function [optional]         |
 |----------------------|-----------------------------------|
@@ -233,7 +233,7 @@ For *N* neurons, the number of possible neuron triplets is *N\*(N-1)\*(N-2)/2*. 
 | `functional.m`       | `TE.m`                            |
 | `TE.m`               | `cond_MI.m`                       |
 
-## Bugs
+# Bugs
 
 * `I_spec.m` and `cond_MI.m` may condition on events with zero probability. For now, all cases involving zero probability are discarded. Such a decision may require theoretical justification. Possible alternative solutions include:
   * Time-binning. For Yuqing's model, all AdEx neurons have some time constant *tau*. Might make sense to bin at time resolution equal to *tau*.
@@ -242,7 +242,7 @@ For *N* neurons, the number of possible neuron triplets is *N\*(N-1)\*(N-2)/2*. 
 * Non-zero values (both positive and negative) with small magnitude may obtain when value zero is expected. Possible reasons include:  
   * Rounding error may occur. Information measures in `I_spec.m` and `cond_MI.m` require both ratios of probabilities as well as the absolute value of probabilities. Ratio calculations use the number of occurrences unnormalized by the total length of the time-series, whereas the absolute value probabilities are divided by the total length.
 
-## References
+# References
 
 Williams, Paul L. and Randall D. Beer. "Nonnegative Decomposition of Multivariate Information." *CoRR* abs/1004.2515 (2010). url: http://arxiv.org/abs/1004.2515v1.
 
@@ -252,7 +252,7 @@ Timme, Nicholas, Wesley Alford, Benjamin Flecker, and John M. Beggs. "Synergy, R
 
 Timme et al. "High-Degree Neurons Feed Cortical Computations." *PLoS Comput Biol* 12(5):e1004858 (2016). doi: 10.1371/journal.pcbi.1004858.
 
-## Authors
+# Authors
 
 * Mofei Wu.  
 mofei@uchicago.edu.  
