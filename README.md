@@ -2,6 +2,31 @@
 
 Compute partial information decomposition (PID) on transfer entropy for an input matrix of time-series for a single trial, or an input cell containing multiple matrices corresponding to multiple trials. The redundancy partial information term is given by the minimum information function described by Timme et al., 2016.
 
+<!--ts-->
+   * [Transfer Entropy Partial Information Decomposition](#transfer-entropy-partial-information-decomposition)
+      * [Prerequisites](#prerequisites)
+      * [Usage](#usage)
+         * [Examples](#examples)
+         * [Sample workflow](#sample-workflow)
+            * [Inputs:](#inputs)
+            * [Command window:](#command-window)
+            * [Outputs:](#outputs)
+               * [Folder:](#folder)
+               * [Workspace:](#workspace)
+      * [Functions](#functions)
+         * [TE_PID.m](#te_pidm)
+            * [Parameters:](#parameters)
+            * [Outputs:](#outputs-1)
+            * [In-script variables:](#in-script-variables)
+         * [Call structure](#call-structure)
+      * [Bugs](#bugs)
+      * [References](#references)
+      * [Authors](#authors)
+
+<!-- Added by: mofei, at: Fri Sep 27 12:59:17 CDT 2019 -->
+
+<!--te-->
+
 ## Prerequisites
 
 * MATLAB: all functions found here are `.m` files.
@@ -100,15 +125,15 @@ In the case of `and`, small values obtain for *unique1* and *unique2*, contrary 
 
 `functional_list`: 3-column matrix of neuron indices forming a functional fan-in triplet where transfer entropies from source neurons in the 2nd and 3rd columns to the target neuron in the 1st column are both greater than zero. Note that this is a subset of `all_PID(:,1:3)`.
 
-`functional_matrix`: *m*x*m* matrix of functional weights between all *m* neurons. Bidirectional connections occurs only if transfer entropy in both directions are equal for a given neuron pair.
+`functional_matrix`: *m* by *m* matrix of functional weights between all *m* neurons. Bidirectional connections occurs only if transfer entropy in both directions are equal for a given neuron pair.
 
 `delta_w`: vector of differences between functional weights *w(ij)* and *w(ji)* for non-zero transfer entropies.
 
-`TE_matrix`: *m*x*m* matrix of functional weights between all *m* neurons, without setting to zero the smaller of *w(ij)* and *w(ji)* for all neuron pairs.
+`TE_matrix`: *m* by *m* matrix of functional weights between all *m* neurons, without setting to zero the smaller of *w(ij)* and *w(ji)* for all neuron pairs.
 
 `recruit_list`: 3-column matrix of neuron indices forming a recruitment fan-in triplet. Note that this is a subset of both `all_PID(:,1:3` and `functional_list`.
 
-`recruit_mat`: *m*x*m* matrix of recruitment weights between all *m* neurons. Note that this is a subset of `functional_mat`.
+`recruit_mat`: *m* by*m* matrix of recruitment weights between all *m* neurons. Note that this is a subset of `functional_mat`.
 
 `functional_PID`: subset of `all_PID` limited to functional fan-in triplets.
 
@@ -120,32 +145,84 @@ In the case of `and`, small values obtain for *unique1* and *unique2*, contrary 
 
 `corr_target_in`: correlation coefficient between synergy and in-degree of target neuron.
 
-`fig`: figure object plotting histograms of synergy, redundancy, and unique PID values for all triplets, functional triplets, and recruitment triplets. Use `findobj.m` to adjust axes or histogram properties.
+`fig`: figure object plotting histograms of synergy, redundancy, and unique PID values for all triplets, functional triplets, and recruitment triplets. Use `findobj` to adjust axes or histogram properties.
 
 ## Functions
 
 ### `TE_PID.m`
 
-`TE_PID`(*output_filename*, *time-series*, *time-delay*, *triplet_list*, *time_resolution*)  
+`TE_PID(output_filename, time-series, time-delay, triplet_list, time_resolution)`  
 Given input time-series matrices and a scalar time-delay, calculate PID terms for transfer entropy.
 
-For *N* neurons, the number of possible neuron triplets is *N\*(N-1)\*(N-2)/2*. Consequently for large *N*, `TE_PID.m` is computationally intensive if *triplet_list* is not given.
+For *N* neurons, the number of possible neuron triplets is *N\*(N-1)\*(N-2)/2*. Consequently for large *N*, `TE_PID.m` is computationally intensive if `triplet_list` is not given.
 
 #### Parameters:
 
-*output_filename*: string or char. Recommend .csv files.
+`output_filename`: string or char. Recommend .csv files.
 
-*time-series*: matrix or 1-dimensional cell. Columns should contain entire time-series of a given neuron.
+`time-series`: matrix or 1-dimensional cell. Columns should contain entire time-series of a given neuron.
 
-*time-delay*: positive integer scalar.
+`time-delay`: positive integer scalar.
 
-*triplet_list*: [optional] *nx3* matrix of neuron indices. The first column should represent the target neuron index. If *time-series* is a cell, then *triplet_list* should either be a cell with equal dimensions—each cell element containing a triplet list—or a matrix—in which case PID calculations for all trials are restricted to triplets contained in the single matrix. If not given, PID is calculated for all possible triplets. Triplets containing neurons with zero entropy are discarded.
+`triplet_list`: [optional] 3-column matrix of neuron indices. The first column should represent the target neuron index. If `time-series` is a cell, then `triplet_list` should either be a cell with equal dimensions—each cell element containing a triplet list—or a matrix—in which case PID calculations for all trials are restricted to triplets contained in the single matrix. If not given, PID is calculated for all possible triplets. Triplets containing neurons with zero entropy are discarded.
 
-*time_resolution*: [optional] positive integer scalar. Time bins at given *time_resolution* by partitioning input time-series. If a 1 occurs within a partition, a 1 is recorded. Otherwise, a 0 is recorded. Note that if you time bin, the *time-delay* used to calculate transfer entropy applies to the *time-series* after it has been time binned.
+`time_resolution`: [optional] positive integer scalar. Time bins at given *time_resolution* by partitioning input time-series. If a `1` occurs within a partition, a `1` is recorded. Otherwise, a `0` is recorded. Note that if you time bin, the `time-delay` used to calculate transfer entropy applies to the *time-series* after it has been time binned.
 
 #### Outputs:
 
-*output_file*: file. Recommend .csv format. 7 comma-separated columns indicating in increasing order: `target_index`, `source1_index`, `source2_index`, `synergy`, `redundancy`, `unique1`, `unique2`. Each row corresponds to a specific triplet. PID terms are given in units of bits. Entropy for each neuron is also calculated separately.
+`output_filename`: file. Recommend .csv format. 7 comma-separated columns indicating in increasing order: `target_index`, `source1_index`, `source2_index`, `synergy`, `redundancy`, `unique1`, `unique2`. Each row corresponds to a specific triplet. PID terms are given in units of bits. Entropy for each neuron is also calculated separately.
+
+#### In-script variables:
+
+`str`: query user if neurons are represented as columns in `time-series`.
+
+`output_file`: path to output filename to facilitate `fprintf`.
+
+`nNeuron`: number of neurons given in `time-series`.
+
+`neuron_list`: vector of unique neuron indices. If `triplet_list` is not given, `neuron_list = 1:nNeuron`.
+
+`entropy`: Shannon entropy *p*log*p* in bits.
+
+`target_future`: future time-series of each neuron. The first *X* time-steps are truncated, where *X* = `time-delay`.
+
+`prob`: probability that `target_future` takes on a unique value.
+
+`pairs_1`: 2-column matrix of all possible neuron index pair combinations. Generate using MATLAB in-built function `nchoosek`.
+
+`pairs_2`: swap columns 1 and 2 of `pairs_1`.
+
+`targeted_pairs`: concatenate `pairs_1` and `pairs_2` vertically. Equivalent to finding all 2-membered permutations of elements of `neuron_list`.
+
+`single_TEs`: 3-column matrix indicating target neuron index, source neuron index, and transfer entropy in bits.
+
+`row_index`: integer scalar starting at 1 and incrementing each for-loop. Used to write data to new row of output matrix.
+
+`target_1`: 3-column matrix of all possible 3-neuron index combinations. First column indicates target neuron index. Generate using MATLAB in-built function `nchoosek`.
+
+`target_2`: designate second column of `target_1` as target neuron index.
+
+`target_3`: designate third column of `target_1` as target neuron index.
+
+`triplet_list`: concatenate `target_1`, `target_2`, and `target_3` vertically. Equivalent to finding all 3-membered permutations of elements of `neuron_list`, where the permutation order is only over the first member of each triplet.
+
+`redundancy`: explicitly defined component of PID values according to Timme. Calculate using minimum information function.
+
+`TE1`: transfer entropy from first source to target. Extracted from `single_TEs`.
+
+`TE2`: transfer entropy from second source to target. Extracted from `single_TEs`.
+
+`TE12`: transfer entropy from horizontally concatenated first and second source considered as a single vector-valued time-series to target neuron.
+
+`unique1`: PID unique term from first source to target. Constrained by PID equations.
+
+`unique2`: PID unique term from second source to target. Constrained by PID equations.
+
+`synergy`: PID synergy term. Constrained by PID equations.
+
+`output_data`: concatenated PID terms to be printed to output file.
+
+
 
 ### Call structure
 
