@@ -6,7 +6,7 @@ Compute partial information decomposition (PID) on transfer entropy for an input
 <!--ts-->
    * [Transfer Entropy Partial Information Decomposition](#transfer-entropy-partial-information-decomposition)
    * [Table of Contents](#table-of-contents)
-   * [Prerequisites](#prerequisites)
+   * [Dependencies](#dependencies)
    * [Usage](#usage)
       * [Examples](#examples)
       * [Sample workflow](#sample-workflow)
@@ -26,17 +26,20 @@ Compute partial information decomposition (PID) on transfer entropy for an input
          * [Outputs](#outputs-2)
          * [Script variables](#script-variables-1)
       * [I_min_TE.m](#i_min_tem)
+         * [Parameters](#parameters-2)
+         * [Outputs](#outputs-3)
+         * [Script variables](#script-variables-2)
    * [Bugs](#bugs)
    * [References](#references)
    * [Authors](#authors)
 
-<!-- Added by: mofei, at: Fri Sep 27 15:38:51 CDT 2019 -->
+<!-- Added by: mofei, at: Fri Oct  4 11:49:27 CDT 2019 -->
 
 <!--te-->
 
-# Prerequisites
+# Dependencies
 
-* MATLAB: all functions found here are `.m` files.
+* MATLAB R2019a: all functions found here are `.m` files. Various MATLAB in-built functions are called.
 
 # Usage
 
@@ -215,11 +218,11 @@ For *N* neurons, the number of possible neuron triplets is *N\*(N-1)\*(N-2)/2*. 
 
 `row_index`: integer scalar starting at 1 and incrementing each for-loop iteration. Used to write data to new row of output matrix.
 
-`target_1`: 3-column matrix of all possible 3-neuron index combinations. First column indicates target neuron index. Generate using MATLAB in-built function `nchoosek`.
+`triplets_1`: 3-column matrix of all possible 3-neuron index combinations. First column indicates target neuron index. Generate using MATLAB in-built function `nchoosek`.
 
-`target_2`: designate second column of `target_1` as target neuron index.
+`triplets_2`: designate second column of `triplets_1` as target neuron index.
 
-`target_3`: designate third column of `target_1` as target neuron index.
+`triplets_3`: designate third column of `triplets_1` as target neuron index.
 
 `triplet_list`: concatenate `target_1`, `target_2`, and `target_3` vertically. Equivalent to finding all 3-membered permutations of elements of `neuron_list`, where the permutation order is only over the first member of each triplet.
 
@@ -278,6 +281,24 @@ Calculate transfer entropy in bits at given delay from input source time-series 
 `[min_info] = I_min_TE(target, source1, source2, delay)`
 
 Calculate minimum information from `source1` and `source2` to `target` using transfer entropy and the given `delay`.
+
+### Parameters
+
+`target`: vector or matrix. Time-steps should be represented as rows.
+
+`source1`: vector or matrix. Time-steps should be represented as rows.
+
+`source2`: vector or matrix. Time-steps should be represented as rows.
+
+`delay`: positive integer scalar.
+
+### Outputs
+
+`min_info`: positive scalar.
+
+### Script variables
+
+`target_future`: future time-series of `target`. The first *X* time-steps are truncated, where *X* = `delay`.
 
 # Bugs
 
