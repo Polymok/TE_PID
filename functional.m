@@ -21,22 +21,22 @@
 
 function [functional_triplets, functional_matrix, weight_diff, raw_TE_matrix] = functional(input_timeseries, delay, threshold)
 
-    %% Check inputs.
-    if ~ismatrix(input_timeseries)
-        error('Input time-series must be a matrix.')
-    elseif ~isscalar(delay)
-        error('Input time-delay must be a scalar.')
-    elseif delay<1
-        error('Input time-delay must be at least 1.')
-    end
-    % Check if a single time-series is contained in a column.
-    if size(input_timeseries,1) < size(input_timeseries,2)
-        str = input('Input matrix has greater number of columns than rows. Each column should contain the entire time-series of a single neuron. Transpose input matrix? y/n: ','s');
-        if str == 'y'
-            input_timeseries = input_timeseries';
-        end
-        clear str
-    end
+%     %% Check inputs.
+%     if ~ismatrix(input_timeseries)
+%         error('Input time-series must be a matrix.')
+%     elseif ~isscalar(delay)
+%         error('Input time-delay must be a scalar.')
+%     elseif delay<1
+%         error('Input time-delay must be at least 1.')
+%     end
+%     % Check if a single time-series is contained in a column.
+%     if size(input_timeseries,1) < size(input_timeseries,2)
+%         str = input('Input matrix has greater number of columns than rows. Each column should contain the entire time-series of a single neuron. Transpose input matrix? y/n: ','s');
+%         if str == 'y'
+%             input_timeseries = input_timeseries';
+%         end
+%         clear str
+%     end
     nNeuron = size(input_timeseries,2);
     
     %% Calculate functional weight matrix using transfer entropy.

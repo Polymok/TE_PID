@@ -7,29 +7,29 @@
 
 function [condMI] = cond_MI(X, Y, Z)
 
-    %% Check inputs.
-    % Ensure input time-series are column vectors.
-    if size(X,1) < size(X,2)
-        str = input('Input vector X has a greater number of columns than rows. Each column should contain the entire time-series of a single neuron. Transpose input matrix? y/n: ','s');
-        if str == 'y'
-            X = X';
-        end
-    end
-    if size(Y,1) < size(Y,2)
-        str = input('Input vector Y has a greater number of columns than rows. Each column should contain the entire time-series of a single neuron. Transpose input matrix? y/n: ','s');
-        if str == 'y'
-            Y = Y';
-        end
-    end
-    if size(Z,1) < size(Z,2)
-        str = input('Input vector Z has a greater number of columns than rows. Each column should contain the entire time-series of a single neuron. Transpose input matrix? y/n: ','s');
-        if str == 'y'
-            Z = Z';
-        end
-    end
-    if (size(X,1)~=size(Y,1)) || (size(X,1)~=size(Z,1)) || (size(Y,1)~=size(Z,1))
-        error('Input vectors are not of equal length.')
-    end
+%     %% Check inputs.
+%     % Ensure input time-series are column vectors.
+%     if size(X,1) < size(X,2)
+%         str = input('Input vector X has a greater number of columns than rows. Each column should contain the entire time-series of a single neuron. Transpose input matrix? y/n: ','s');
+%         if str == 'y'
+%             X = X';
+%         end
+%     end
+%     if size(Y,1) < size(Y,2)
+%         str = input('Input vector Y has a greater number of columns than rows. Each column should contain the entire time-series of a single neuron. Transpose input matrix? y/n: ','s');
+%         if str == 'y'
+%             Y = Y';
+%         end
+%     end
+%     if size(Z,1) < size(Z,2)
+%         str = input('Input vector Z has a greater number of columns than rows. Each column should contain the entire time-series of a single neuron. Transpose input matrix? y/n: ','s');
+%         if str == 'y'
+%             Z = Z';
+%         end
+%     end
+%     if (size(X,1)~=size(Y,1)) || (size(X,1)~=size(Z,1)) || (size(Y,1)~=size(Z,1))
+%         error('Input vectors are not of equal length.')
+%     end
     
     %% Calculate condition mutual information.
     condMI = 0; % Initialize output.
@@ -43,11 +43,11 @@ function [condMI] = cond_MI(X, Y, Z)
                 probYZ = sum(sum([Y Z]==[j' k'],2)==(size(Y,2)+size(Z,2))); % p(y,z)
                 % Discard cases with probability zero and print message to command window.
                 if probXYZ == 0
-                    disp(['Pr(X,Y,Z=', num2str(i'), ',', num2str(j'), ',', num2str(k'), ') is zero. Case discarded.'])
+%                     disp(['Pr(X,Y,Z=', num2str(i'), ',', num2str(j'), ',', num2str(k'), ') is zero. Case discarded.'])
                 elseif probXZ == 0
-                    disp(['Pr(X,Z=', num2str(i'), ',', num2str(k'), ') is zero. Case discarded.'])
+%                     disp(['Pr(X,Z=', num2str(i'), ',', num2str(k'), ') is zero. Case discarded.'])
                 elseif probYZ == 0
-                    disp(['Pr(Y,Z=', num2str(j'), ',', num2str(k'), ') is zero. Case discarded.'])
+%                     disp(['Pr(Y,Z=', num2str(j'), ',', num2str(k'), ') is zero. Case discarded.'])
                 else
                     probZ = sum(Z==k'); % p(z)
                     condMI = condMI + probXYZ/size(X,1) * log2(probXYZ * probZ / probXZ / probYZ); % MI(X;Y|Z) = sum_{X=x,Y=y,Z=z} p(x,y,z)*log(p(x,y,z)*p(z)/p(x,z)/p(y,z))

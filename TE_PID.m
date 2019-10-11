@@ -40,16 +40,16 @@
 
 function TE_PID(output_filename, input_timeseries, delay, triplet_list, resolution)
 
-    %% Check inputs.
-    if nargin < 3
-        error('At least 3 inputs required.')
-    elseif ~isscalar(delay)
-        error('Input time-delay must be a scalar.')
-    elseif (round(delay)~=delay) || (delay<1)
-        error('Input time-delay must be a positive integer.')
-    elseif ~isstring(output_filename) && ~ischar(output_filename)
-        error('Output filename must be entered as a string or char.')
-    end
+%     %% Check inputs.
+%     if nargin < 3
+%         error('At least 3 inputs required.')
+%     elseif ~isscalar(delay)
+%         error('Input time-delay must be a scalar.')
+%     elseif (round(delay)~=delay) || (delay<1)
+%         error('Input time-delay must be a positive integer.')
+%     elseif ~isstring(output_filename) && ~ischar(output_filename)
+%         error('Output filename must be entered as a string or char.')
+%     end
     
     %% Case: input is a matrix containing a single trial.
     if ismatrix(input_timeseries)

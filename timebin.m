@@ -15,34 +15,34 @@
 
 function [output_timeseries] = timebin(input_timeseries, resolution)
 
-    %% Check inputs.
-    if ~isscalar(resolution)
-        error('Input time-delay is not a scalar.')
-    elseif (round(resolution)~=resolution) || (resolution<1)
-        error('Input time-delay is not a positive integer.')
-    end
-    % Check if input time-series is a matrix.
-    if ~ismatrix(input_timeseries)
-        error('Input time-series must be a matrix.')
-    end
-    % Check if time-series are binary.
-    entries = unique(input_timeseries);
-    if size(entries,1) ~= 2
-        error('Input time-series must be binary.')
-    elseif entries ~= [0;1]
-        str = input('Input matrix must be binary with 0 or 1 valued entries. Change matrix to contain only 0 and 1? y/n: ','s');
-        if str == 'y'
-            input_timeseries = input_timeseries==entries(2);
-        end
-    end
-    % Check if a single time-series is contained in a column.
-    if size(input_timeseries,1) < size(input_timeseries,2)
-        str = input('Input matrix has greater number of columns than rows. Each column should contain the entire time-series of a single neuron. Transpose input matrix? y/n: ','s');
-        if str == 'y'
-            input_timeseries = input_timeseries';
-        end
-        clear str
-    end
+%     %% Check inputs.
+%     if ~isscalar(resolution)
+%         error('Input time-delay is not a scalar.')
+%     elseif (round(resolution)~=resolution) || (resolution<1)
+%         error('Input time-delay is not a positive integer.')
+%     end
+%     % Check if input time-series is a matrix.
+%     if ~ismatrix(input_timeseries)
+%         error('Input time-series must be a matrix.')
+%     end
+%     % Check if time-series are binary.
+%     entries = unique(input_timeseries);
+%     if size(entries,1) ~= 2
+%         error('Input time-series must be binary.')
+%     elseif entries ~= [0;1]
+%         str = input('Input matrix must be binary with 0 or 1 valued entries. Change matrix to contain only 0 and 1? y/n: ','s');
+%         if str == 'y'
+%             input_timeseries = input_timeseries==entries(2);
+%         end
+%     end
+%     % Check if a single time-series is contained in a column.
+%     if size(input_timeseries,1) < size(input_timeseries,2)
+%         str = input('Input matrix has greater number of columns than rows. Each column should contain the entire time-series of a single neuron. Transpose input matrix? y/n: ','s');
+%         if str == 'y'
+%             input_timeseries = input_timeseries';
+%         end
+%         clear str
+%     end
     
     %% Time bin.
     % Initialize output to contain rows equal to the number of input rows divided by the resolution rounded down.

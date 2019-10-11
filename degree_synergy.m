@@ -13,16 +13,16 @@
 
 function [corr_source_out, corr_target_in, indegree, outdegree] = degree_synergy(PID, weight_matrix, entropy, triplet_list, threshold)
 
-    %% Check inputs.
-    if nargin < 2
-        error('At least 2 input arguments are required: PID values and a weight matrix.')
-    elseif ~ismatrix(PID) || ~ismatrix(weight_matrix)
-        error('Input datatype must be a matrix.')
-    elseif size(PID,2) ~= 7
-        error('Input PID values must a matrix with 7 columns, e.g. output of TE_PID.m.')
-    elseif size(weight_matrix,1) ~= size(weight_matrix,2)
-        error('Input adjacency matrix must be square.')
-    end
+%     %% Check inputs.
+%     if nargin < 2
+%         error('At least 2 input arguments are required: PID values and a weight matrix.')
+%     elseif ~ismatrix(PID) || ~ismatrix(weight_matrix)
+%         error('Input datatype must be a matrix.')
+%     elseif size(PID,2) ~= 7
+%         error('Input PID values must a matrix with 7 columns, e.g. output of TE_PID.m.')
+%     elseif size(weight_matrix,1) ~= size(weight_matrix,2)
+%         error('Input adjacency matrix must be square.')
+%     end
     nNeuron = size(weight_matrix,1);
     
     %% Optionally, threshold weight matrix.
@@ -42,8 +42,8 @@ function [corr_source_out, corr_target_in, indegree, outdegree] = degree_synergy
     
     %% Create binary adjacency matrix from weight matrix, then calculate in and out degrees.
     weight_matrix(weight_matrix~=0) = 1; % Binarize adjacency matrix.
-    indegree = sum(weight_matrix,1)'; % Returns a 1-dimensional list of neuron in-degrees, the indices of which correspond to indices of the weight matrix.
-    outdegree = sum(weight_matrix,2); % Similarly, returns neuron out-degrees.
+    indegree = sum(weight_matrix,1)'; % Return a 1-dimensional list of neuron in-degrees, the indices of which correspond to indices of the weight matrix.
+    outdegree = sum(weight_matrix,2); % Similarly, return neuron out-degrees.
     
     %% Optionally, specify a subset of neuron triplets over which to calculate synergy-degree correlation.
     if nargin < 4 || isempty(triplet_list)
@@ -79,14 +79,14 @@ function [corr_source_out, corr_target_in, indegree, outdegree] = degree_synergy
             entropy = extended_entropy; % Rename.
             clear extended_entropy
         end
-        entropies = entropy(PID(iAll,1),2);
-        if sum(entropies==0) ~= 0
+        target_entropies = entropy(PID(iAll,1),2);
+        if sum(target_entropies==0) ~= 0
             iNonzeroEntropy = entropy(PID(:,1),2)~=0;
             iAll = iAll & iNonzeroEntropy;
         end
         synergies = PID(iAll,4);
-        entropies = entropy(PID(iAll,1),2);
-        synergies = synergies ./ entropies;
+        target_entropies = entropy(PID(iAll,1),2);
+        synergies = synergies ./ target_entropies;
     else
         synergies = PID(iAll,4);
     end
