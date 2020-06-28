@@ -135,6 +135,12 @@ function TE_PID(output_filename, input_timeseries, delay, triplet_list, resoluti
         end
         
         %% Calculate and write PID values to output file.
+        fprintf(output_file, 'Time delay in units of time steps, %1u\n', delay);
+        if nargin==5
+            fprintf(output_file, 'Bin at time resolution, %1u\n', resolution);
+        else
+            fprintf(output_file, 'Bin at time resolution, 1\n');
+        end
         fprintf(output_file, 'Target, Source1, Source2, Synergy, Redundancy, Unique1, Unique2\n');
         for i = triplet_list'
             redundancy = I_min_TE(input_timeseries(:,i(1)), input_timeseries(:,i(2)), input_timeseries(:,i(3)), delay); % Calculate redundacy using minimum information first.

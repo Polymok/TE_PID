@@ -13,30 +13,32 @@
 % number of functional connections, and the number of bidirectional
 % connections are printed to the command window.
 %
-% Optionally input a threshold percentage. E.g. if input threshold is 80%,
-% result will discard bottom 80% of non-zero functional connections.
+% Optionally input a threshold percentage, either as a single scalar or
+% multiple scalars between zero and one in a vector. E.g. if input
+% threshold is 80%, result will discard bottom 80% of non-zero functional
+% connections.
 %
 % This function is designed to filter neuron triplets for transfer entropy
 % partial information decomposition calculation.
 
 function [functional_triplets, functional_matrix, weight_diff, raw_TE_matrix] = functional(input_timeseries, delay, threshold)
 
-%     %% Check inputs.
-%     if ~ismatrix(input_timeseries)
-%         error('Input time-series must be a matrix.')
-%     elseif ~isscalar(delay)
-%         error('Input time-delay must be a scalar.')
-%     elseif delay<1
-%         error('Input time-delay must be at least 1.')
-%     end
-%     % Check if a single time-series is contained in a column.
-%     if size(input_timeseries,1) < size(input_timeseries,2)
-%         str = input('Input matrix has greater number of columns than rows. Each column should contain the entire time-series of a single neuron. Transpose input matrix? y/n: ','s');
-%         if str == 'y'
-%             input_timeseries = input_timeseries';
-%         end
-%         clear str
-%     end
+    %% Check inputs.
+    if ~ismatrix(input_timeseries)
+        error('Input time-series must be a matrix.')
+    elseif ~isscalar(delay)
+        error('Input time-delay must be a scalar.')
+    elseif delay<1
+        error('Input time-delay must be at least 1.')
+    end
+    % Check if a single time-series is contained in a column.
+    if size(input_timeseries,1) < size(input_timeseries,2)
+        str = input('Input matrix has greater number of columns than rows. Each column should contain the entire time-series of a single neuron. Transpose input matrix? y/n: ','s');
+        if str == 'y'
+            input_timeseries = input_timeseries';
+        end
+        clear str
+    end
     nNeuron = size(input_timeseries,2);
     
     %% Calculate functional weight matrix using transfer entropy.
@@ -87,30 +89,47 @@ function [functional_triplets, functional_matrix, weight_diff, raw_TE_matrix] = 
     end
     
     %% Optionally, threshold functional weight matrix.
-    if nargin == 3
-        if ~isscalar(threshold)
-            error('Threshold must be a scalar.')
-        elseif (threshold>1) || (threshold<0)
+    if (nargin == 3) && any(threshold ~= 1)
+        if ~isvector(threshold)
+            error('Threshold must be a scalar or a vector.')
+        elseif any(threshold>1) || any(threshold<0)
             error('Threshold must be between 0 and 1.')
         else
             ordered_weights = sort(functional_matrix(:));
             ordered_weights(ordered_weights==0) = [];
-            threshold_value = ordered_weights(floor(threshold*size(ordered_weights,1)));
-            % Remove weight differences corresponding to thresholded functional connections.
-            iThreshold = false(size(weight_diff,1),1);
-            for i = 1:size(neuron_pairs,1)
-                if ((functional_matrix(neuron_pairs(i,1),neuron_pairs(i,2))>0) && (functional_matrix(neuron_pairs(i,1),neuron_pairs(i,2))<threshold_value)) || ((functional_matrix(neuron_pairs(i,2),neuron_pairs(i,1))>0) && (functional_matrix(neuron_pairs(i,2),neuron_pairs(i,1))<threshold_value))
-                    iThreshold(i) = 1;
+            threshold_value = ordered_weights(floor(threshold * size(ordered_weights,1)));
+            nThreshold = length(threshold);
+            if nThreshold == 1
+                iThreshold = false(size(weight_diff,1),1);
+                for i = 1:size(neuron_pairs,1)
+                    if ((functional_matrix(neuron_pairs(i,1),neuron_pairs(i,2))>0) && (functional_matrix(neuron_pairs(i,1),neuron_pairs(i,2))<threshold_value)) || ((functional_matrix(neuron_pairs(i,2),neuron_pairs(i,1))>0) && (functional_matrix(neuron_pairs(i,2),neuron_pairs(i,1))<threshold_value))
+                        iThreshold(i) = 1;
+                    end
+                end
+                weight_diff(iThreshold | iZeros) = [];
+                functional_matrix(functional_matrix < threshold_value) = 0;
+            else
+                functional_matrix = repmat(functional_matrix, 1, 1, nThreshold);
+                weight_diff = repmat(weight_diff, 1, 1, nThreshold);
+                for i = 1:nThreshold
+                    iThreshold = false(size(weight_diff,1),1);
+                    funcmat_i = functional_matrix(:,:,i);
+                    deltaw_i = weight_diff(:,:,i);
+                    for j = 1:size(neuron_pairs,1)
+                        if ((funcmat_i(neuron_pairs(j,1),neuron_pairs(j,2)) > 0) && (funcmat_i(neuron_pairs(i,1),neuron_pairs(i,2)) < threshold_value(i)) || (funcmat_i(neuron_pairs(i,2),neuron_pairs(i,1)) > 0) && (funcmat_i(neuron_pairs(i,2),neuron_pairs(i,1)) < threshold_value(i)))
+                            iThreshold(j) = 1;
+                        end
+                    end
+                    deltaw_i(iThreshold | iZeros) = [];
+                    funcmat_i(funcmat_i < threshold_value(i)) = 0;
+                    functional_matrix(:,:,i) = funcmat_i;
+                    weight_diff(:,:,i) = deltaw_i;
                 end
             end
-            clear neuron_pairs
-            weight_diff(iThreshold|iZeros) = [];
-            functional_matrix(functional_matrix<threshold_value) = 0;
         end
-        clear threshold_value ordered_weights izeros ithreshold
+        clear threshold_value ordered_weights neuron_pairs
     else
         weight_diff(iZeros) = [];
-        clear izeros
     end
     
     %% Print topological data of interest to command window.
