@@ -110,7 +110,7 @@ In the case of `and`, small values obtain for *unique1* and *unique2*, contrary 
 >> [recruit_list, recruit_matrix] = recruitment(functional_matrix, synaptic_matrix);  
 >> functional_PID = PID_extract(all_PID, functional_list);  
 >> recruit_PID = PID_extract(all_PID, recruit_list);  
->> corr_funcional_synaptic = compare_matrix(TE_matrix, synaptic_matrix);  
+>> corr_functional_synaptic = compare_matrix(TE_matrix, synaptic_matrix);  
 >> [corr_source_out, corr_target_in] = degree_synergy(functional_PID, functional_matrix, entropies, functional_list);  
 >> fig = PID_plot(all_PID, functional_PID, recruit_PID);  
 ```
@@ -143,7 +143,7 @@ In the case of `and`, small values obtain for *unique1* and *unique2*, contrary 
 
 `recruit_list`: 3-column matrix of neuron indices forming a recruitment fan-in triplet. Note that this is a subset of both `all_PID(:,1:3` and `functional_list`.
 
-`recruit_mat`: *m* by*m* matrix of recruitment weights between all *m* neurons. Note that this is a subset of `functional_mat`.
+`recruit_mat`: *m* by *m* matrix of recruitment weights between all *m* neurons. Note that this is a subset of `functional_mat`.
 
 `functional_PID`: subset of `all_PID` limited to functional fan-in triplets.
 
@@ -321,6 +321,6 @@ Timme et al. "High-Degree Neurons Feed Cortical Computations." *PLoS Comput Biol
 
 # Authors
 
-* Mofei Wu.  
-mofei@uchicago.edu.  
-mwumofei@gmail.com.  
+* Mofei Wu  
+mofei@uchicago.edu  
+mwumofei@gmail.com  
