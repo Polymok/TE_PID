@@ -22,20 +22,18 @@ Also includes some plotting capabilities, as well as extraction of functional an
       * [TE_PID.m](#te_pidm)
          * [Parameters](#parameters)
          * [Outputs](#outputs-1)
-         * [Script variables](#script-variables)
       * [TE.m](#tem)
          * [Parameters](#parameters-1)
          * [Outputs](#outputs-2)
-         * [Script variables](#script-variables-1)
       * [I_min_TE.m](#i_min_tem)
          * [Parameters](#parameters-2)
          * [Outputs](#outputs-3)
-         * [Script variables](#script-variables-2)
+   * [Complexity](#complexity)
    * [Bugs](#bugs)
    * [References](#references)
    * [Authors](#authors)
 
-<!-- Added by: mofei, at: Fri Oct  4 11:49:27 CDT 2019 -->
+<!-- Added by: mofei, at: Wed Oct 20 14:06:59 EDT 2021 -->
 
 <!--te-->
 
