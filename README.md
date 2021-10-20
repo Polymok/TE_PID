@@ -1,6 +1,8 @@
 # Transfer Entropy Partial Information Decomposition
 
-Compute partial information decomposition (PID) on transfer entropy for an input matrix of time-series for a single trial, or an input cell containing multiple matrices corresponding to multiple trials. The redundancy partial information term is given by the minimum information function described by Timme et al., 2016.
+Compute partial information decomposition (PID) of transfer entropy between time-series. The redundancy partial information term is given by the minimum information function described by Timme et al., 2016.
+
+Also includes some plotting capabilities, as well as extraction of functional and recruitment matrices.
 
 # Table of Contents
 <!--ts-->
@@ -174,8 +176,6 @@ In the case of `and`, small values obtain for *unique1* and *unique2*, contrary 
 
 Given input time-series matrices and a scalar time-delay, calculate PID terms for transfer entropy.
 
-For *N* neurons, the number of possible neuron triplets is *N\*(N-1)\*(N-2)/2*. Consequently for large *N*, `TE_PID.m` is computationally intensive if `triplet_list` is not given.
-
 ### Parameters
 
 `output_filename`: string or char. Recommend .csv files.
@@ -191,56 +191,6 @@ For *N* neurons, the number of possible neuron triplets is *N\*(N-1)\*(N-2)/2*. 
 ### Outputs
 
 `output_filename`: file. Recommend .csv format. 7 comma-separated columns indicating in increasing order: `target_index`, `source1_index`, `source2_index`, `synergy`, `redundancy`, `unique1`, `unique2`. Each row corresponds to a specific triplet. PID terms are given in units of bits. Entropy for each neuron is also calculated separately.
-
-### Script variables
-
-`str`: query user if neurons are represented as columns in `input_timeseries`.
-
-`output_file`: path to output filename to facilitate `fprintf`.
-
-`nNeuron`: number of neurons given in `input_timeseries`.
-
-`neuron_list`: vector of unique neuron indices. If `triplet_list` is not given, `neuron_list = 1:nNeuron`.
-
-`entropy`: Shannon entropy *p*log*p* in bits.
-
-`target_future`: future time-series of each neuron. The first *X* time-steps are truncated, where *X* = `delay`.
-
-`prob`: probability that `target_future` takes on a unique value.
-
-`pairs_1`: 2-column matrix of all possible neuron index pair combinations. Generate using MATLAB in-built function `nchoosek`.
-
-`pairs_2`: swap columns 1 and 2 of `pairs_1`.
-
-`targeted_pairs`: concatenate `pairs_1` and `pairs_2` vertically. Equivalent to finding all 2-membered permutations of elements of `neuron_list`.
-
-`single_TEs`: 3-column matrix indicating target neuron index, source neuron index, and transfer entropy in bits.
-
-`row_index`: integer scalar starting at 1 and incrementing each for-loop iteration. Used to write data to new row of output matrix.
-
-`triplets_1`: 3-column matrix of all possible 3-neuron index combinations. First column indicates target neuron index. Generate using MATLAB in-built function `nchoosek`.
-
-`triplets_2`: designate second column of `triplets_1` as target neuron index.
-
-`triplets_3`: designate third column of `triplets_1` as target neuron index.
-
-`triplet_list`: concatenate `target_1`, `target_2`, and `target_3` vertically. Equivalent to finding all 3-membered permutations of elements of `neuron_list`, where the permutation order is only over the first member of each triplet.
-
-`redundancy`: explicitly defined component of PID values according to Timme. Calculate using minimum information function.
-
-`TE1`: transfer entropy from first source to target. Extracted from `single_TEs`.
-
-`TE2`: transfer entropy from second source to target. Extracted from `single_TEs`.
-
-`TE12`: transfer entropy from horizontally concatenated first and second source considered as a single vector-valued time-series to target neuron.
-
-`unique1`: PID unique term from first source to target. Constrained by PID equations.
-
-`unique2`: PID unique term from second source to target. Constrained by PID equations.
-
-`synergy`: PID synergy term. Constrained by PID equations.
-
-`output_data`: concatenated PID terms to be printed to output file.
 
 ## `TE.m`
 
@@ -262,20 +212,6 @@ Calculate transfer entropy in bits at given delay from input source time-series 
 
 `normed_TE`: positive scalar. `transfer_entropy` normalized by entropy of future time-series of `target`, i.e. `target` with the first *X* time-steps removed, where *X* = `delay`. Output is a ratio, thus dimensionless.
 
-### Script variables
-
-`str`: query user if neurons are represented as columns in `target` and `source`.
-
-`target_future`: future time-series of `target`. The first *X* time-steps are truncated, where *X* = `delay`.
-
-`target_past`: past time-series of `target`. The last *X* time-steps are truncated, where *X* = `delay`.
-
-`source_past`: past time-series of `source`. The last *X* time-steps are truncated, where *X* = `delay`.
-
-`target_entropy`: Shannon entropy *p*log*p* of `target_future` in bits.
-
-`prob`: probability that `target_future` takes on a unique value.
-
 ## `I_min_TE.m`
 
 `[min_info] = I_min_TE(target, source1, source2, delay)`
@@ -296,9 +232,23 @@ Calculate minimum information from `source1` and `source2` to `target` using tra
 
 `min_info`: positive scalar.
 
-### Script variables
+# Complexity
 
-`target_future`: future time-series of `target`. The first *X* time-steps are truncated, where *X* = `delay`.
+For input of size *n* neurons by *m* timebins, current time complexity should be *O(mn^3)*. Specifically, the number of targeted neuron triplets is 3 \* (*n* choose 3), or *O(n^3)*. For each targeted triplet, various probabilities and joint probabilities are calculated by traversing the time-series multiple times and counting instances, at *O(m)*. Though I struggle to see how asymptotic time can be reduced, wall-clock time should allow improvement.
+
+For each triplet comprising target I and sources J, K---denoted (I; J, K)---four terms need to be calculated: minimum information from (J, K) to I, transfer entropy from (J, K) to I, transfer entropy from J to I, and transfer entropy from K to I. The first two terms are unique to each triplet, whereas the latter two terms are shared between multiple triplets. For example, transfer entropy from J to I is used not only in triplet (I; J, K), but also triplet (I; J, L). Currently, 2-ary transfer entropy terms are calculated first before moving on to the 3-ary transfer entropy and minimum information terms to avoid repeated calculations. Further optimization, however, is still possible.
+
+For each time-series X, p(x) is used to calculate minimum information if X is the target, transfer entropy if X is the target, as well as the entropy of X. For minimum information and transfer entropy, p(x) should be calculated for both past and future time-series by applying the input time-delay. Such terms should be calculated first to avoid repetition.
+
+For each time-series X, joint probability p(x\_past, x\_future) is used to calculate minimum information if X is the target, and transfer entropy if X is the target. Currently, this term is calculated once every pair for transfer entropy, and once every triplet for minimum information.
+
+For all time-series X, Y where X != Y, joint probabilities p(x\_past, y\_past) and p(x\_past, y\_past, y\_future) are used to calculate minimum information if X is a source and Y is the target, as well as transfer entropy from X to Y.
+
+For triplet (I; J, K), minimum information is calculated by taking the minimum over sources J, K of the specific information between I and J, and between I and K. Such specific information should be stored rather than recalculated for every triplet, since, for example, the specific information between I and J is also needed to calculate minimum information for triplet (I; J, L).
+
+Space complexity has generally not been a problem with binary time-series on the order of *n*=1000 neurons and *m*=10,000 timebins. Currently, 2-ary targeted transfer entropy is calculated first and stored, using *O(n^2)* space. For the proposed changes above, the highest order term to be calculated is still 2-ary, so asymptotic space usage should not increase. Note that MATLAB handles pass-by-reference under the hood, given that the parameter is not altered within the function.
+
+Further optimization is possible at the cost of input generality. For example, current code is amenable to non-binary time-series, as well as calculating conditional mutual information between any three time-series, not just time-delayed time-series.
 
 # Bugs
 
